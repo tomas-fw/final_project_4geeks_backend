@@ -117,150 +117,169 @@ def admin_register():
 ### ADMIN ROUTES ##### GET ALL PROFESIONALS OR SPECIFIC PROFESIONAL BY ID
 @app.route('/admin/profesional', methods=['GET'])
 @app.route('/admin/profesional/<int:role_id>', methods=['GET'])
-@app.route('/admin/profesional/<int:role_id>/<int:id>', methods=['GET'])
+@app.route('/admin/profesional/<int:role_id>/<int:id>', methods=['GET','PUT'])
 def admin_profesionals(role_id=None, id = None):
-    if role_id != None and role_id != 2 and role_id != 3:       ### THIS VERIFIES THAT THE ROLE EXISTS WITHIN PROFESIONALS
-        return jsonify({"msg":"role input not valid"}), 404
-    if role_id is None:                                         ###     THIS BIRNGS UP EVERY PROFESIONAL
-        trainers = Trainer.query.all()
-        nutritionists = Nutritionist.query.all()
-        profesionals ={
-            "trainer":[],
-            "nutritionist":[]
-        }
-        for trainer in trainers:
-            obj={
-                "id":trainer.id,
-                "email":trainer.email,
-                "name":trainer.name,
-                "lastname": trainer.lastname,
-                "register_date":trainer.date_created,
-                "specialties": trainer.specialties,
-                'is_active':trainer.active,
-                "all_plans":[]
+    if request.method == 'GET':
+        if role_id != None and role_id != 2 and role_id != 3:       ### THIS VERIFIES THAT THE ROLE EXISTS WITHIN PROFESIONALS
+            return jsonify({"msg":"role input not valid"}), 404
+        if role_id is None:                                         ###     THIS BIRNGS UP EVERY PROFESIONAL
+            trainers = Trainer.query.all()
+            nutritionists = Nutritionist.query.all()
+            profesionals ={
+                "trainer":[],
+                "nutritionist":[]
             }
-            for plans in trainer.planes_id:
-                planes ={
-                    "plan_detailed":plans.serialize()
+            for trainer in trainers:
+                obj={
+                    "id":trainer.id,
+                    "email":trainer.email,
+                    "name":trainer.name,
+                    "lastname": trainer.lastname,
+                    "register_date":trainer.date_created,
+                    "specialties": trainer.specialties,
+                    'is_active':trainer.active,
+                    "all_plans":[]
                 }
-                obj["all_plans"].append(planes)
-            profesionals['trainer'].append(obj)
-
-        for nutri in nutritionists:
-            obj={
-                "id":nutri.id,
-                "email":nutri.email,
-                "name":nutri.name,
-                "lastname": nutri.lastname,
-                "register_date":nutri.date_created,
-                "specialties": nutri.specialties,
-                'is_active': nutri.active,
-                "all_plans":[]
-            }
-            for plan in nutri.planes_id:
-                planes ={
-                    "plan_detailed":plan.serialize()
-                }
-                obj['all_plans'].append(planes)
-            profesionals['nutritionist'].append(obj)
-        
-        return jsonify(profesionals), 200
-    
-    if role_id == 2 and id == None:                 #### THIS BRINGS UP EVERY NUTRITIONIST
-        all_nutritionist = Nutritionist.query.all()
-        nutritionists = []
-        for nutri in all_nutritionist:
-            obj={
-                'id':nutri.id,
-                'email':nutri.email,
-                'name':nutri.name,
-                'lastname':nutri.lastname,
-                'specialties':nutri.specialties,
-                'is_active': nutri.active,
-                'all_plans':[]
-            }          
-            for plan in nutri.planes_id:
-                plans={
-                    'plans_detail':plan.serialize()
-                }
-                obj['all_plans'].append(plans)
-            nutritionists.append(obj)
-        return jsonify(nutritionists)  
-
-    if role_id == 3 and id == None:             ####  THIS BRINGS UP EVERY TRAINER
-        all_trainers = Trainer.query.all()    
-        trainers = []
-        for trainer in all_trainers:
-            obj={
-                'id':trainer.id,
-                'email':trainer.email,
-                'name':trainer.name,
-                'lastname':trainer.lastname,
-                'specialties':trainer.specialties,
-                'is_active': trainer.active,
-                'all_plans':[]
-            }
-            for plan in trainer.planes_id:
-                plans={
-                    'plans_detail':plan.serialize()
-                }
-                obj['all_plans'].append(plans)
-            trainers.append(obj)
-        return jsonify(trainers)
-
-    if role_id == 2 and id:             ####   THIS BIRNGS UP A SPECIFIC NUTRITIONIST
-        single_nutritionist = Nutritionist.query.get(id)
-        nutritionists = Nutritionist.query.all()
-        nutri =[]
-        if not single_nutritionist:
-            return jsonify({'msg':'Nutritionist does not exist in database'})
-        else:
-            for nutritionist in nutritionists:
-                if nutritionist.id == id:
-                    obj ={
-                        'id':nutritionist.id,
-                        'email':nutritionist.email,
-                        'name':nutritionist.name,
-                        'lastname': nutritionist.lastname,
-                        'specialties': nutritionist.specialties,
-                        'is_active': nutritionist.active,
-                        'all_plans':[]
+                for plans in trainer.planes_id:
+                    planes ={
+                        "plan_detailed":plans.serialize()
                     }
-                    for plan in nutritionist.planes_id:
-                        all_plans={
-                            'plans_detail':plan.serialize()
-                        }
-                        obj['all_plans'].append(all_plans)
-                    nutri.append(obj)
-            return jsonify(nutri)
-    
-    if role_id == 3 and id:                 #####           THIS BRINGS UP A SPECIFIC TRAINER
-        single_trainer = Trainer.query.get(id)
-        all_trainers = Trainer.query.all()
-        personal_trainer = []
-        if not single_trainer:
-            return jsonify({"msg":"Trainer not found in database"}), 400
-        else:
+                    obj["all_plans"].append(planes)
+                profesionals['trainer'].append(obj)
+
+            for nutri in nutritionists:
+                obj={
+                    "id":nutri.id,
+                    "email":nutri.email,
+                    "name":nutri.name,
+                    "lastname": nutri.lastname,
+                    "register_date":nutri.date_created,
+                    "specialties": nutri.specialties,
+                    'is_active': nutri.active,
+                    "all_plans":[]
+                }
+                for plan in nutri.planes_id:
+                    planes ={
+                        "plan_detailed":plan.serialize()
+                    }
+                    obj['all_plans'].append(planes)
+                profesionals['nutritionist'].append(obj)
+            
+            return jsonify(profesionals), 200
+        
+        if role_id == 2 and id == None:                 #### THIS BRINGS UP EVERY NUTRITIONIST
+            all_nutritionist = Nutritionist.query.all()
+            nutritionists = []
+            for nutri in all_nutritionist:
+                obj={
+                    'id':nutri.id,
+                    'email':nutri.email,
+                    'name':nutri.name,
+                    'lastname':nutri.lastname,
+                    'specialties':nutri.specialties,
+                    'is_active': nutri.active,
+                    'all_plans':[]
+                }          
+                for plan in nutri.planes_id:
+                    plans={
+                        'plans_detail':plan.serialize()
+                    }
+                    obj['all_plans'].append(plans)
+                nutritionists.append(obj)
+            return jsonify(nutritionists)  
+
+        if role_id == 3 and id == None:             ####  THIS BRINGS UP EVERY TRAINER
+            all_trainers = Trainer.query.all()    
+            trainers = []
             for trainer in all_trainers:
-                if trainer.id == id:
-                    obj ={
-                        'id':trainer.id,
-                        'email':trainer.email,
-                        'name':trainer.name,
-                        'lastname': trainer.lastname,
-                        'specialties': trainer.specialties,
-                        'is_active': trainer.active,
-                        'all_plans':[]
+                obj={
+                    'id':trainer.id,
+                    'email':trainer.email,
+                    'name':trainer.name,
+                    'lastname':trainer.lastname,
+                    'specialties':trainer.specialties,
+                    'is_active': trainer.active,
+                    'all_plans':[]
+                }
+                for plan in trainer.planes_id:
+                    plans={
+                        'plans_detail':plan.serialize()
                     }
-                    for plan in trainer.planes_id:
-                        all_plans={
-                            'plans_detail':plan.serialize()
-                        }
-                        obj['all_plans'].append(all_plans)
-                    personal_trainer.append(obj)          
-            return jsonify(personal_trainer)
+                    obj['all_plans'].append(plans)
+                trainers.append(obj)
+            return jsonify(trainers)
 
+        if role_id == 2 and id:             ####   THIS BIRNGS UP A SPECIFIC NUTRITIONIST
+            single_nutritionist = Nutritionist.query.get(id)
+            nutritionists = Nutritionist.query.all()
+            nutri =[]
+            if not single_nutritionist:
+                return jsonify({'msg':'Nutritionist does not exist in database'})
+            else:
+                for nutritionist in nutritionists:
+                    if nutritionist.id == id:
+                        obj ={
+                            'id':nutritionist.id,
+                            'email':nutritionist.email,
+                            'name':nutritionist.name,
+                            'lastname': nutritionist.lastname,
+                            'specialties': nutritionist.specialties,
+                            'is_active': nutritionist.active,
+                            'all_plans':[]
+                        }
+                        for plan in nutritionist.planes_id:
+                            all_plans={
+                                'plans_detail':plan.serialize()
+                            }
+                            obj['all_plans'].append(all_plans)
+                        nutri.append(obj)
+                return jsonify(nutri)
         
+        if role_id == 3 and id:                 #####           THIS BRINGS UP A SPECIFIC TRAINER
+            single_trainer = Trainer.query.get(id)
+            all_trainers = Trainer.query.all()
+            personal_trainer = []
+            if not single_trainer:
+                return jsonify({"msg":"Trainer not found in database"}), 400
+            else:
+                for trainer in all_trainers:
+                    if trainer.id == id:
+                        obj ={
+                            'id':trainer.id,
+                            'email':trainer.email,
+                            'name':trainer.name,
+                            'lastname': trainer.lastname,
+                            'specialties': trainer.specialties,
+                            'is_active': trainer.active,
+                            'all_plans':[]
+                        }
+                        for plan in trainer.planes_id:
+                            all_plans={
+                                'plans_detail':plan.serialize()
+                            }
+                            obj['all_plans'].append(all_plans)
+                        personal_trainer.append(obj)          
+                return jsonify(personal_trainer)
+
+    if request.method == 'PUT':
+        if role_id == 2 and id:
+            single_nutritionist= Nutritionist.query.get(id)
+        if not single_nutririonist:
+            return jsonify({'msg':'nutritionist does not exist in database'}), 404
+        
+        active = request.form.get('active')
+
+        if not active or active == '':
+            return jsonify({"msg":"Missing name field"}),404
+       
+        nutritionist = Client.query.get(id)
+        nutritionist.active = active
+
+        db.session.commit()
+      
+        return jsonify(nutritionist.active), 200
+        
+
 ### ADMIN ROUTES   #####   GET ALL CLIENTS IN DATABASE OR SPECIFIC CLIENT BY ID
 
 @app.route('/admin/client', methods=['GET'])
@@ -317,37 +336,21 @@ def admin_clients(client_id = None):
                 return jsonify(specific_client), 200
               
     if request.method == 'PUT':             #### THIS ONE DOESN'T WORK BECAUSE CANNOT DELETE FOREIGNKEY CONSTRAIN NULL,(DEPENDENCIES FROM OTHER TABLES)
+        single_client= Client.query.get(client_id)
+        if not single_client:
+            return jsonify({'msg':'client does not exist in database'}), 404
+        
+        active = request.form.get('active')
 
-        email = request.form.get('email')
-        # password = request.form.get('password')
-        name = request.form.get("name")
-        lastname=request.form.get("lastname")
-        # active = request.form.get('active')
-
-        if not email or email == '':
-            return jsonify({"msg":"Missing email field"}),404
-        # if not password or password == '':
-        #     return jsonify({"msg":"Missing password field"}),404
-        if not name or name == '':
+        if not active or active == '':
             return jsonify({"msg":"Missing name field"}),404
-        if not lastname or lastname == '':
-            return jsonify({"msg":"Missing last name field"}),404
-
+       
         client = Client.query.get(client_id)
-        client.email = email
-        # client.password = bcrypt.generate_password_hash(password)
-        client.name = name
-        client.lastname = lastname
-        # client.active = active
+        client.active = active
 
         db.session.commit()
-        # access_token = create_access_token(identity = client.email)
-        # data={
-        #     'access_token': access_token,
-        #     'profesional': nutri.serialize()
-        # }
-
-        return jsonify(client.serialize()), 200
+      
+        return jsonify(client.active), 200
 
     if request.method == 'DELETE':          #### THIS ONE DOESN'T WORK BECAUSE CANNOT DELETE FOREIGNKEY CONSTRAIN NULL,(DEPENDENCIES FROM OTHER TABLES)
         client = Client.query.get(client_id)
@@ -387,7 +390,7 @@ def login(role_id):
             access_token = create_access_token(identity = nutritionist.email)
             data={
                 'access_token': access_token,
-                'nutritionist':{
+                'user':{
                     'nutritionist_id': nutritionist.id,
                     'email': nutritionist.email,
                     'name': nutritionist.name,
@@ -409,7 +412,7 @@ def login(role_id):
                 planes={
                     'all_plans':plans.serialize()
                 }
-                data['nutritionist']['planes_id'].append(planes)
+                data['user']['planes_id'].append(planes)
             return jsonify(data), 200
         
         
@@ -434,7 +437,7 @@ def login(role_id):
             access_token = create_access_token(identity = trainer.email)
             data={
                 'access_token': access_token,
-                'trainer':{
+                'user':{
                     'nutritionist_id': trainer.id,
                     'email': trainer.email,
                     'name': trainer.name,
@@ -457,7 +460,7 @@ def login(role_id):
                     'all_plans':plans.serialize(),                    
                 }
                
-                data['trainer']['planes_id'].append(planes)
+                data['user']['planes_id'].append(planes)
             return jsonify(data), 200
     if role_id == 4:
         if not request.is_json:
@@ -480,7 +483,7 @@ def login(role_id):
             access_token = create_access_token(identity = client.email)
             data={
                 'access_token': access_token,
-                'client':{
+                'user':{
                     'client_id': client.id,
                     'email': client.email,
                     'name': client.name,
@@ -496,7 +499,7 @@ def login(role_id):
                 planes={
                     'all_plans':plans.serialize()
                 }
-                data['client']['planes_id'].append(planes)
+                data['user']['planes_id'].append(planes)
             return jsonify(data), 200
 
 ###    PROFESIONAL ROUTES #### --REGISTER

@@ -39,7 +39,7 @@ class Admin(db.Model):
 class Client(db.Model):
     __tablename__ = 'client'
     id = db.Column(db.Integer, primary_key=True)
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id',ondelete='SET NULL'), nullable=False )
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False )
     planes_id = db.relationship('Planes', backref ='client_detail', lazy = True )
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(100), nullable=False)
@@ -47,10 +47,10 @@ class Client(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     # objective = db.relationship('Objective', backref ='client_detail', lazy=True)
     # age = db.Column(db.Integer, nullable=True)
-    photo = db.Column(db.String(100), nullable=False, default='./static/images/avatar/default_profile.png')
+    photo = db.Column(db.String(100), nullable=False, default='default_profile.png')
     role = db.relationship('Role')
     date_created = db.Column(db.DateTime, nullable = False, default = datetime.utcnow)
-    active = db.Column(db.Boolean, nullable = False, default = True)
+    active = db.Column(db.String(50), nullable=True ,default = 'active')
 
 ##### formulario nutricionista ingreso cliente ######
 ##### formulario personal trainer ingreso cliente ######
@@ -72,13 +72,13 @@ class Client(db.Model):
 class Nutritionist(db.Model):
     __tablename__ = 'nutritionist'
     id = db.Column(db.Integer, primary_key=True)
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id',ondelete='SET NULL'), nullable=False)
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
     planes_id = db.relationship('Planes', backref = 'nutritionist_detail', lazy=True)
     password = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     name = db.Column(db.String(100), nullable=False)
     lastname = db.Column(db.String(100), nullable=False)
-    photo = db.Column(db.String(100), nullable=False, default='./static/images/avatar/default_profile.png')
+    photo = db.Column(db.String(100), nullable=False, default='default_profile.png')
     specialties = db.Column(db.String(100), nullable=True)
     education = db.Column(db.String(100), nullable=True)
     age = db.Column(db.Integer, nullable=True)
@@ -87,7 +87,7 @@ class Nutritionist(db.Model):
     description = db.Column(db.Text, nullable=True)
     role = db.relationship(Role)
     date_created = db.Column(db.DateTime, nullable = False, default = datetime.utcnow )
-    active = db.Column(db.Boolean, nullable = False, default = False)
+    active = db.Column(db.String(50), nullable=True, default ='inactive')
 
 
     def serialize(self):
@@ -113,13 +113,13 @@ class Nutritionist(db.Model):
 class Trainer(db.Model):
     __tablename__ = 'trainer'
     id = db.Column(db.Integer, primary_key=True)
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id',ondelete='SET NULL'), nullable=False)
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
     planes_id = db.relationship('Planes', backref = 'trainer_detail', lazy=True)
     password = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     name = db.Column(db.String(100), nullable=False)
     lastname = db.Column(db.String(100), nullable=False)
-    photo = db.Column(db.String(100), nullable=False, default='./static/images/avatar/default_profile.png')
+    photo = db.Column(db.String(100), nullable=False, default='default_profile.png')
     specialties = db.Column(db.String(100), nullable=True)
     education = db.Column(db.String(100), nullable=True)
     age = db.Column(db.Integer, nullable=True)
@@ -128,7 +128,7 @@ class Trainer(db.Model):
     description = db.Column(db.Text, nullable=True)
     role = db.relationship(Role)
     date_created = db.Column(db.DateTime, nullable = False, default = datetime.utcnow )
-    active = db.Column(db.Boolean, nullable = False, default = False)
+    active = db.Column(db.String(50), nullable=True, default ='inactive')
 
 
     def serialize(self):
@@ -155,16 +155,16 @@ class Trainer(db.Model):
 class Planes(db.Model):
     __tablename__ = 'planes'
     id = db.Column(db.Integer, primary_key=True)
-    client_id = db.Column(db.Integer, db.ForeignKey('client.id', ondelete='SET NULL'), nullable=False)
-    nutritionist_id = db.Column(db.Integer, db.ForeignKey('nutritionist.id',ondelete='SET NULL'), nullable=False)
-    trainer_id = db.Column(db.Integer, db.ForeignKey('trainer.id',ondelete='SET NULL'), nullable=False)
+    client_id = db.Column(db.Integer, db.ForeignKey('client.id'), nullable=False)
+    nutritionist_id = db.Column(db.Integer, db.ForeignKey('nutritionist.id'), nullable=False)
+    trainer_id = db.Column(db.Integer, db.ForeignKey('trainer.id',), nullable=False)
     client = db.relationship('Client')
     nutritionist = db.relationship('Nutritionist')
     trainer = db.relationship('Trainer')
     objective = db.Column(db.String(250), nullable=False)
     comment = db.Column(db.Text, nullable = True)
     date_created = db.Column(db.DateTime, nullable = False, default = datetime.utcnow)
-    active = db.Column(db.Boolean, nullable = False, default = True)
+    active = db.Column(db.String(50), nullable=True, default = 'active')
 
     def serialize(self):
         return {

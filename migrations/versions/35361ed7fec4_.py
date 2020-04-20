@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 71ac8173c130
+Revision ID: 35361ed7fec4
 Revises: 
-Create Date: 2020-04-20 07:54:56.749978
+Create Date: 2020-04-20 15:10:59.865378
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '71ac8173c130'
+revision = '35361ed7fec4'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -45,8 +45,8 @@ def upgrade():
     sa.Column('email', sa.String(length=100), nullable=False),
     sa.Column('photo', sa.String(length=100), nullable=False),
     sa.Column('date_created', sa.DateTime(), nullable=False),
-    sa.Column('active', sa.Boolean(), nullable=False),
-    sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ondelete='SET NULL'),
+    sa.Column('active', sa.String(length=50), nullable=True),
+    sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
     )
@@ -65,8 +65,8 @@ def upgrade():
     sa.Column('lastWorkyears', sa.Integer(), nullable=True),
     sa.Column('description', sa.Text(), nullable=True),
     sa.Column('date_created', sa.DateTime(), nullable=False),
-    sa.Column('active', sa.Boolean(), nullable=False),
-    sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ondelete='SET NULL'),
+    sa.Column('active', sa.String(length=50), nullable=True),
+    sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
     )
@@ -85,8 +85,8 @@ def upgrade():
     sa.Column('lastWorkyears', sa.Integer(), nullable=True),
     sa.Column('description', sa.Text(), nullable=True),
     sa.Column('date_created', sa.DateTime(), nullable=False),
-    sa.Column('active', sa.Boolean(), nullable=False),
-    sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ondelete='SET NULL'),
+    sa.Column('active', sa.String(length=50), nullable=True),
+    sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
     )
@@ -98,10 +98,10 @@ def upgrade():
     sa.Column('objective', sa.String(length=250), nullable=False),
     sa.Column('comment', sa.Text(), nullable=True),
     sa.Column('date_created', sa.DateTime(), nullable=False),
-    sa.Column('active', sa.Boolean(), nullable=False),
-    sa.ForeignKeyConstraint(['client_id'], ['client.id'], ondelete='SET NULL'),
-    sa.ForeignKeyConstraint(['nutritionist_id'], ['nutritionist.id'], ondelete='SET NULL'),
-    sa.ForeignKeyConstraint(['trainer_id'], ['trainer.id'], ondelete='SET NULL'),
+    sa.Column('active', sa.String(length=50), nullable=True),
+    sa.ForeignKeyConstraint(['client_id'], ['client.id'], ),
+    sa.ForeignKeyConstraint(['nutritionist_id'], ['nutritionist.id'], ),
+    sa.ForeignKeyConstraint(['trainer_id'], ['trainer.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###
