@@ -44,6 +44,7 @@ class Client(db.Model):
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     lastname = db.Column(db.String(100), nullable=False)
+    gender = db.Column(db.String(100), nullable=True)
     email = db.Column(db.String(100), unique=True, nullable=False)
     # objective = db.relationship('Objective', backref ='client_detail', lazy=True)
     # age = db.Column(db.Integer, nullable=True)
@@ -57,6 +58,7 @@ class Client(db.Model):
     def serialize(self):
         return {
             "client_id": self.id,
+            'gender':self.gender,
             "name": self.name,
             "lastname": self.lastname,
             "email": self.email,
@@ -165,6 +167,25 @@ class Planes(db.Model):
     comment = db.Column(db.Text, nullable = True)
     date_created = db.Column(db.DateTime, nullable = False, default = datetime.utcnow)
     active = db.Column(db.String(50), nullable=True, default = 'active')
+    embarazo = db.Column(db.String(100), nullable=True)
+    enfermedades = db.Column(db.String(100), nullable=True)
+    medicamento = db.Column(db.String(100), nullable=True)
+    cirugias = db.Column(db.String(100), nullable=True)
+    orina = db.Column(db.String(100), nullable=True)
+    digestion = db.Column(db.String(100), nullable=True)
+    sintomas = db.Column(db.String(100), nullable=True)#signos y sintomas
+    ayunos = db.Column(db.String(100), nullable=True)
+    apetito = db.Column(db.String(100), nullable=True)
+    ansiedad = db.Column(db.String(100), nullable=True)
+    tabaco = db.Column(db.String(100), nullable=True)
+    alcohol = db.Column(db.String(100), nullable=True)
+    actividad_fisica = db.Column(db.String(100), nullable=True)
+    suplemento_nutricional = db.Column(db.String(100), nullable=True)
+    lesiones = db.Column(db.String(100), nullable=True)
+    alergia = db.Column(db.String(100), nullable=True)
+    peso = db.Column(db.String(100), nullable=True)
+    altura = db.Column(db.String(100), nullable=True)
+    cintura = db.Column(db.String(100), nullable=True)
 
     def serialize(self):
         return {
@@ -178,15 +199,31 @@ class Planes(db.Model):
             "objective" : self.objective,
             "comment" : self.comment,
             "created" : self.date_created,
-            "active": self.active
-
+            "active": self.active,
+            'embarazo':self.embarazo,
+            'medicamento':self.medicamento,
+            'ciruguias':self.cirugias,
+            'sintomas':self.sintomas,
+            'suplementos':self.suplemento_nutricional,
+            'lesiones':self.lesiones,
+            'altura':self.altura,
+            'cintura':self.cintura,
+            'alcohol':self.alcohol,
+            'peso':self.peso,
+            'orina':self.orina,
+            'digestion':self.digestion,
+            'ansiedad':self.ansiedad,
+            'ayunos':self.ayunos,
+            'alergias':self.alergia,
+            'tabaco':self.tabaco,
+            'actividad_fisica':self.actividad_fisica,
+            'enfermedades':self.enfermedades,
+            'apetito':self.apetito
         }
+    
 
-# class Objective(db.Model):
-#     __tablename__= 'objective'
-#     id = db.Column(db.Integer, primary_key=True)
-#     objective = db.Column(db.Text, nullable=False)
-#     observation = db.Column(db.Text, nullable = True)
-#     age = db.Column(db.Integer, nullable=True)
-#     date_created = db.Column(db.DateTime, nullable = False, default = datetime.utcnow)
-#     client_id = db.Column(db.Integer, db.ForeignKey('client.id'), nullable = False)
+
+
+
+
+    

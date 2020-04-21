@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 35361ed7fec4
+Revision ID: 4736f9664c07
 Revises: 
-Create Date: 2020-04-20 15:10:59.865378
+Create Date: 2020-04-20 18:02:56.224196
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '35361ed7fec4'
+revision = '4736f9664c07'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -42,6 +42,7 @@ def upgrade():
     sa.Column('password', sa.String(length=100), nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('lastname', sa.String(length=100), nullable=False),
+    sa.Column('gender', sa.String(length=100), nullable=True),
     sa.Column('email', sa.String(length=100), nullable=False),
     sa.Column('photo', sa.String(length=100), nullable=False),
     sa.Column('date_created', sa.DateTime(), nullable=False),
@@ -99,6 +100,25 @@ def upgrade():
     sa.Column('comment', sa.Text(), nullable=True),
     sa.Column('date_created', sa.DateTime(), nullable=False),
     sa.Column('active', sa.String(length=50), nullable=True),
+    sa.Column('embarazo', sa.String(length=100), nullable=True),
+    sa.Column('enfermedades', sa.String(length=100), nullable=True),
+    sa.Column('medicamento', sa.String(length=100), nullable=True),
+    sa.Column('cirugias', sa.String(length=100), nullable=True),
+    sa.Column('orina', sa.String(length=100), nullable=True),
+    sa.Column('digestion', sa.String(length=100), nullable=True),
+    sa.Column('sintomas', sa.String(length=100), nullable=True),
+    sa.Column('ayunos', sa.String(length=100), nullable=True),
+    sa.Column('apetito', sa.String(length=100), nullable=True),
+    sa.Column('ansiedad', sa.String(length=100), nullable=True),
+    sa.Column('tabaco', sa.String(length=100), nullable=True),
+    sa.Column('alcohol', sa.String(length=100), nullable=True),
+    sa.Column('actividad_fisica', sa.String(length=100), nullable=True),
+    sa.Column('suplemento_nutricional', sa.String(length=100), nullable=True),
+    sa.Column('lesiones', sa.String(length=100), nullable=True),
+    sa.Column('alergia', sa.String(length=100), nullable=True),
+    sa.Column('peso', sa.String(length=100), nullable=True),
+    sa.Column('altura', sa.String(length=100), nullable=True),
+    sa.Column('cintura', sa.String(length=100), nullable=True),
     sa.ForeignKeyConstraint(['client_id'], ['client.id'], ),
     sa.ForeignKeyConstraint(['nutritionist_id'], ['nutritionist.id'], ),
     sa.ForeignKeyConstraint(['trainer_id'], ['trainer.id'], ),

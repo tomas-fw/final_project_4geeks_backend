@@ -65,7 +65,7 @@ def login_admin():
         access_token = create_access_token(identity = admin.username)
         data = {
             'access_token': access_token,
-            'admin': admin.serialize()
+            'user': admin.serialize()
         }
 
         return jsonify(data), 200
@@ -262,23 +262,41 @@ def admin_profesionals(role_id=None, id = None):
                 return jsonify(personal_trainer)
 
     if request.method == 'PUT':
+        if role_id != None and role_id != 2 and role_id != 3:       ### THIS VERIFIES THAT THE ROLE EXISTS WITHIN PROFESIONALS
+            return jsonify({"msg":"role input not valid"}), 404
         if role_id == 2 and id:
             single_nutritionist= Nutritionist.query.get(id)
-        if not single_nutririonist:
-            return jsonify({'msg':'nutritionist does not exist in database'}), 404
+            if not single_nutritionist:
+                return jsonify({'msg':'nutritionist does not exist in database'}), 404
         
-        active = request.form.get('active')
+            active = request.form.get('active')
 
-        if not active or active == '':
-            return jsonify({"msg":"Missing name field"}),404
-       
-        nutritionist = Client.query.get(id)
-        nutritionist.active = active
-
-        db.session.commit()
-      
-        return jsonify(nutritionist.active), 200
+            if not active or active == '':
+                return jsonify({"msg":"Missing active field"}),404
         
+            nutritionist = Nutritionist.query.get(id)
+            nutritionist.active = active
+
+            db.session.commit()
+        
+            return jsonify(nutritionist.active), 200
+        
+        if role_id == 3 and id:
+            single_trainer= Trainer.query.get(id)
+            if not single_trainer:
+                return jsonify({'msg':'trainer does not exist in database'}), 404
+        
+            active = request.form.get('active')
+
+            if not active or active == '':
+                return jsonify({"msg":"Missing active field"}),404
+        
+            trainer = Trainer.query.get(id)
+            trainer.active = active
+
+            db.session.commit()
+        
+            return jsonify(trainer.active), 200
 
 ### ADMIN ROUTES   #####   GET ALL CLIENTS IN DATABASE OR SPECIFIC CLIENT BY ID
 
@@ -486,6 +504,7 @@ def login(role_id):
                 'user':{
                     'client_id': client.id,
                     'email': client.email,
+                    'gender': client.gender,
                     'name': client.name,
                     'lastname': client.lastname,
                     'photo':client.photo,
@@ -503,7 +522,7 @@ def login(role_id):
             return jsonify(data), 200
 
 ###    PROFESIONAL ROUTES #### --REGISTER
-@app.route('/register/profesional/<int:role>', methods=['POST']) ##REGISTER PROFESIONAL
+@app.route('/profesional/register/<int:role>', methods=['POST']) ##REGISTER PROFESIONAL
 def profesional_register(role):
         
     email = request.form.get('email')
@@ -667,6 +686,26 @@ def client_plan(id_client = None, plan_id= None):
         client_id = request.json.get('client_id')
         nutritionist_id = request.json.get('nutritionist_id')
         trainer_id = request.json.get('trainer_id')
+        actividad_fisica = request.json.get('actividad_fisica')
+        alcohol = request.json.get('alcohol')
+        alergias = request.json.get('alergias')
+        altura = request.json.get('altura')
+        ansiedad = request.json.get('ansiedad')
+        apetito = request.json.get('apetito')
+        ayunos = request.json.get('ayunos')
+        cintura = request.json.get('cintura')
+        ciruguias = request.json.get('cirugias')
+        comment = request.json.get('comment')
+        digestion = request.json.get('digestion')
+        embarazo = request.json.get('embarazo')
+        enfermedades = request.json.get('enfermedades')
+        lesiones = request.json.get('lesiones')
+        medicamento = request.json.get('medicamento')
+        orina = request.json.get('orina')
+        peso = request.json.get('peso')
+        sintomas = request.json.get('sintomas')
+        suplementos = request.json.get('suplementos')
+        tabaco = request.json.get('tabaco')        
 
         if not objective or objective == '':
             return jsonify({'msg':'Missing objective'}), 400
@@ -683,8 +722,7 @@ def client_plan(id_client = None, plan_id= None):
         if not trainer_id or trainer_id == '':
             return jsonify({'msg':'Missing trainer'}), 400
         if not Trainer.query.filter_by(id=trainer_id).all():
-            return jsonify({'msg':"Trainer does not exist in database"})
-        
+            return jsonify({'msg':"Trainer does not exist in database"})        
                     
         
         plan = Planes()
@@ -692,6 +730,26 @@ def client_plan(id_client = None, plan_id= None):
         plan.client_id = client_id
         plan.nutritionist_id = nutritionist_id
         plan.trainer_id = trainer_id
+        plan.actividad_fisica= actividad_fisica
+        plan.alcohol = alcohol
+        plan.alergia = alergias
+        plan.altura = altura
+        plan.ansiedad = ansiedad
+        plan.apetito = apetito
+        plan.ayunos = ayunos
+        plan.cintura = cintura
+        plan.cirugias = ciruguias
+        plan.comment = comment
+        plan.digestion = digestion
+        plan.embarazo = embarazo
+        plan.enfermedades = enfermedades
+        plan.lesiones = lesiones
+        plan.medicamento = medicamento
+        plan.orina = orina
+        plan.peso = peso
+        plan.sintomas = sintomas
+        plan.suplemento_nutricional = suplementos
+        plan.tabaco = tabaco 
 
         db.session.add(plan)
         db.session.commit()
