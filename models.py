@@ -48,13 +48,11 @@ class Client(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     # objective = db.relationship('Objective', backref ='client_detail', lazy=True)
     # age = db.Column(db.Integer, nullable=True)
-    photo = db.Column(db.String(100), nullable=False, default='default_profile.png')
+    avatar = db.Column(db.String(100), nullable=True, default='default_profile.png')
     role = db.relationship('Role')
     date_created = db.Column(db.DateTime, nullable = False, default = datetime.utcnow)
-    active = db.Column(db.String(50), nullable=True ,default = 'active')
+    active = db.Column(db.Boolean, nullable=True ,default = True)
 
-##### formulario nutricionista ingreso cliente ######
-##### formulario personal trainer ingreso cliente ######
     def serialize(self):
         return {
             "client_id": self.id,
@@ -62,7 +60,7 @@ class Client(db.Model):
             "name": self.name,
             "lastname": self.lastname,
             "email": self.email,
-            "photo": self.photo,
+            "avatar": self.avatar,
             "role": self.role.serialize(),
             "created": self.date_created,
             "planes_id": self.planes_id,
@@ -80,16 +78,19 @@ class Nutritionist(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     name = db.Column(db.String(100), nullable=False)
     lastname = db.Column(db.String(100), nullable=False)
-    photo = db.Column(db.String(100), nullable=False, default='default_profile.png')
+    gender = db.Column(db.String(100), nullable=True)
+    avatar = db.Column(db.String(100), nullable=True, default='default_profile.png')
+    background = db.Column(db.String(100), nullable=False)
+    profesional_title = db.Column(db.String(100), nullable=False)
+    nutritionist_validation_title = db.Column(db.String(100), nullable=True)
     specialties = db.Column(db.String(100), nullable=True)
-    education = db.Column(db.String(100), nullable=True)
     age = db.Column(db.Integer, nullable=True)
     lastWork = db.Column(db.String(100), nullable=True)
     lastWorkyears = db.Column(db.Integer, nullable=True)
     description = db.Column(db.Text, nullable=True)
     role = db.relationship(Role)
     date_created = db.Column(db.DateTime, nullable = False, default = datetime.utcnow )
-    active = db.Column(db.String(50), nullable=True, default ='inactive')
+    active = db.Column(db.Boolean, nullable=True ,default = False)
 
 
     def serialize(self):
@@ -99,9 +100,12 @@ class Nutritionist(db.Model):
             "email": self.email,
             "name": self.name,
             "lastname": self.lastname,
-            "photo": self.photo,
+            'gender':self.gender,
+            "avatar": self.avatar,
+            "background": self.background,
+            "profesional_title": self.profesional_title,
+            'title_vaidattion':self.nutritionist_validation_title,
             "specialties": self.specialties,
-            "education": self.education,
             "age": self.age,
             "lastWork": self.lastWork,
             "lastWorkyears": self.lastWorkyears,
@@ -121,16 +125,18 @@ class Trainer(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     name = db.Column(db.String(100), nullable=False)
     lastname = db.Column(db.String(100), nullable=False)
-    photo = db.Column(db.String(100), nullable=False, default='default_profile.png')
+    gender = db.Column(db.String(100), nullable=True)
+    avatar = db.Column(db.String(100), nullable=True, default='default_profile.png')
+    background = db.Column(db.String(100), nullable=False)
+    profesional_title = db.Column(db.String(100), nullable=False)
     specialties = db.Column(db.String(100), nullable=True)
-    education = db.Column(db.String(100), nullable=True)
     age = db.Column(db.Integer, nullable=True)
     lastWork = db.Column(db.String(100), nullable=True)
     lastWorkyears = db.Column(db.Integer, nullable=True)
     description = db.Column(db.Text, nullable=True)
     role = db.relationship(Role)
     date_created = db.Column(db.DateTime, nullable = False, default = datetime.utcnow )
-    active = db.Column(db.String(50), nullable=True, default ='inactive')
+    active = db.Column(db.Boolean, nullable=True , default = False)
 
 
     def serialize(self):
@@ -140,9 +146,11 @@ class Trainer(db.Model):
             "email": self.email,
             "name": self.name,
             "lastname": self.lastname,
-            "photo": self.photo,
+            'gender':self.gender,
+            "avatar": self.avatar,
+            "background": self.background,
+            "profesional_title": self.profesional_title,
             "specialties": self.specialties,
-            "education": self.education,
             "age": self.age,
             "lastWork": self.lastWork,
             "lastWorkyears": self.lastWorkyears,

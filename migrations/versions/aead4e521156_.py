@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 4736f9664c07
+Revision ID: aead4e521156
 Revises: 
-Create Date: 2020-04-20 18:02:56.224196
+Create Date: 2020-04-22 10:00:55.570586
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '4736f9664c07'
+revision = 'aead4e521156'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -44,9 +44,9 @@ def upgrade():
     sa.Column('lastname', sa.String(length=100), nullable=False),
     sa.Column('gender', sa.String(length=100), nullable=True),
     sa.Column('email', sa.String(length=100), nullable=False),
-    sa.Column('photo', sa.String(length=100), nullable=False),
+    sa.Column('avatar', sa.String(length=100), nullable=True),
     sa.Column('date_created', sa.DateTime(), nullable=False),
-    sa.Column('active', sa.String(length=50), nullable=True),
+    sa.Column('active', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
@@ -58,15 +58,18 @@ def upgrade():
     sa.Column('email', sa.String(length=100), nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('lastname', sa.String(length=100), nullable=False),
-    sa.Column('photo', sa.String(length=100), nullable=False),
+    sa.Column('gender', sa.String(length=100), nullable=True),
+    sa.Column('avatar', sa.String(length=100), nullable=True),
+    sa.Column('background', sa.String(length=100), nullable=False),
+    sa.Column('profesional_title', sa.String(length=100), nullable=False),
+    sa.Column('nutritionist_validation_title', sa.String(length=100), nullable=True),
     sa.Column('specialties', sa.String(length=100), nullable=True),
-    sa.Column('education', sa.String(length=100), nullable=True),
     sa.Column('age', sa.Integer(), nullable=True),
     sa.Column('lastWork', sa.String(length=100), nullable=True),
     sa.Column('lastWorkyears', sa.Integer(), nullable=True),
     sa.Column('description', sa.Text(), nullable=True),
     sa.Column('date_created', sa.DateTime(), nullable=False),
-    sa.Column('active', sa.String(length=50), nullable=True),
+    sa.Column('active', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
@@ -78,15 +81,17 @@ def upgrade():
     sa.Column('email', sa.String(length=100), nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('lastname', sa.String(length=100), nullable=False),
-    sa.Column('photo', sa.String(length=100), nullable=False),
+    sa.Column('gender', sa.String(length=100), nullable=True),
+    sa.Column('avatar', sa.String(length=100), nullable=True),
+    sa.Column('background', sa.String(length=100), nullable=False),
+    sa.Column('profesional_title', sa.String(length=100), nullable=False),
     sa.Column('specialties', sa.String(length=100), nullable=True),
-    sa.Column('education', sa.String(length=100), nullable=True),
     sa.Column('age', sa.Integer(), nullable=True),
     sa.Column('lastWork', sa.String(length=100), nullable=True),
     sa.Column('lastWorkyears', sa.Integer(), nullable=True),
     sa.Column('description', sa.Text(), nullable=True),
     sa.Column('date_created', sa.DateTime(), nullable=False),
-    sa.Column('active', sa.String(length=50), nullable=True),
+    sa.Column('active', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')

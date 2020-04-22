@@ -16,6 +16,7 @@ from werkzeug.utils import secure_filename
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 ALLOWED_EXTENSIONS_IMAGES = {'png','jpg','jpeg', 'gif', 'svg'}
+ALLOWED_EXTENSIONS_FILES = {'png','jpg','jpeg', 'gif', 'svg', 'pdf'}
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -126,18 +127,26 @@ def admin_profesionals(role_id=None, id = None):
             trainers = Trainer.query.all()
             nutritionists = Nutritionist.query.all()
             profesionals ={
-                "trainer":[],
-                "nutritionist":[]
+                "trainers":[],
+                "nutritionists":[]
             }
             for trainer in trainers:
                 obj={
                     "id":trainer.id,
+                    'role_id':trainer.role_id,
                     "email":trainer.email,
                     "name":trainer.name,
                     "lastname": trainer.lastname,
                     "register_date":trainer.date_created,
                     "specialties": trainer.specialties,
                     'is_active':trainer.active,
+                    "background": trainer.background,
+                    "profesional_title": trainer.profesional_title,
+                    "specialties": trainer.specialties,
+                    "age": trainer.age,
+                    "lastWork": trainer.lastWork,
+                    "lastWorkyears": trainer.lastWorkyears,
+                    "description": trainer.description,
                     "all_plans":[]
                 }
                 for plans in trainer.planes_id:
@@ -145,17 +154,26 @@ def admin_profesionals(role_id=None, id = None):
                         "plan_detailed":plans.serialize()
                     }
                     obj["all_plans"].append(planes)
-                profesionals['trainer'].append(obj)
+                profesionals['trainers'].append(obj)
 
             for nutri in nutritionists:
                 obj={
                     "id":nutri.id,
+                    'role_id':nutri.role_id,
                     "email":nutri.email,
                     "name":nutri.name,
                     "lastname": nutri.lastname,
                     "register_date":nutri.date_created,
                     "specialties": nutri.specialties,
                     'is_active': nutri.active,
+                    "background": nutri.background,
+                    "profesional_title": nutri.profesional_title,
+                    'title_vaidattion':nutri.nutritionist_validation_title,
+                    "specialties": nutri.specialties,
+                    "age": nutri.age,
+                    "lastWork": nutri.lastWork,
+                    "lastWorkyears": nutri.lastWorkyears,
+                    "description": nutri.description,
                     "all_plans":[]
                 }
                 for plan in nutri.planes_id:
@@ -163,7 +181,7 @@ def admin_profesionals(role_id=None, id = None):
                         "plan_detailed":plan.serialize()
                     }
                     obj['all_plans'].append(planes)
-                profesionals['nutritionist'].append(obj)
+                profesionals['nutritionists'].append(obj)
             
             return jsonify(profesionals), 200
         
@@ -219,12 +237,22 @@ def admin_profesionals(role_id=None, id = None):
                 for nutritionist in nutritionists:
                     if nutritionist.id == id:
                         obj ={
-                            'id':nutritionist.id,
-                            'email':nutritionist.email,
-                            'name':nutritionist.name,
-                            'lastname': nutritionist.lastname,
-                            'specialties': nutritionist.specialties,
+                            "id":nutritionist.id,
+                            'role_id':nutritionist.role_id,
+                            "email":nutritionist.email,
+                            "name":nutritionist.name,
+                            "lastname": nutritionist.lastname,
+                            "register_date":nutritionist.date_created,
+                            "specialties": nutritionist.specialties,
                             'is_active': nutritionist.active,
+                            "background": nutritionist.background,
+                            "profesional_title": nutritionist.profesional_title,
+                            'title_vaidattion':nutritionist.nutritionist_validation_title,
+                            "specialties": nutritionist.specialties,
+                            "age": nutritionist.age,
+                            "lastWork": nutritionist.lastWork,
+                            "lastWorkyears": nutritionist.lastWorkyears,
+                            "description": nutritionist.description,
                             'all_plans':[]
                         }
                         for plan in nutritionist.planes_id:
@@ -245,12 +273,21 @@ def admin_profesionals(role_id=None, id = None):
                 for trainer in all_trainers:
                     if trainer.id == id:
                         obj ={
-                            'id':trainer.id,
-                            'email':trainer.email,
-                            'name':trainer.name,
-                            'lastname': trainer.lastname,
-                            'specialties': trainer.specialties,
-                            'is_active': trainer.active,
+                            "id":trainer.id,
+                            'role_id':trainer.role_id,
+                            "email":trainer.email,
+                            "name":trainer.name,
+                            "lastname": trainer.lastname,
+                            "register_date":trainer.date_created,
+                            "specialties": trainer.specialties,
+                            'is_active':trainer.active,
+                            "background": trainer.background,
+                            "profesional_title": trainer.profesional_title,
+                            "specialties": trainer.specialties,
+                            "age": trainer.age,
+                            "lastWork": trainer.lastWork,
+                            "lastWorkyears": trainer.lastWorkyears,
+                            "description": trainer.description,
                             'all_plans':[]
                         }
                         for plan in trainer.planes_id:
@@ -275,7 +312,7 @@ def admin_profesionals(role_id=None, id = None):
                 return jsonify({"msg":"Missing active field"}),404
         
             nutritionist = Nutritionist.query.get(id)
-            nutritionist.active = active
+            nutritionist.active = bool(active)
 
             db.session.commit()
         
@@ -292,7 +329,7 @@ def admin_profesionals(role_id=None, id = None):
                 return jsonify({"msg":"Missing active field"}),404
         
             trainer = Trainer.query.get(id)
-            trainer.active = active
+            trainer.active = bool(active)
 
             db.session.commit()
         
@@ -414,12 +451,11 @@ def login(role_id):
                     'name': nutritionist.name,
                     'lastname': nutritionist.lastname,
                     'age':nutritionist.age,
-                    'photo':nutritionist.photo,
+                    'avatar':nutritionist.avatar,
                     'lasWork': nutritionist.lastWork,
                     'lastWorkedyears':nutritionist.lastWorkyears,
                     'active': nutritionist.active,
                     'created': nutritionist.date_created,
-                    'educaction': nutritionist.education,
                     'description': nutritionist.description,
                     'specialties':nutritionist.specialties,
                     'role':nutritionist.role.serialize(),
@@ -461,12 +497,11 @@ def login(role_id):
                     'name': trainer.name,
                     'lastname': trainer.lastname,
                     'age':trainer.age,
-                    'photo':trainer.photo,
+                    'avatar':trainer.avatar,
                     'lasWork': trainer.lastWork,
                     'lastWorkedyears':trainer.lastWorkyears,
                     'active': trainer.active,
                     'created': trainer.date_created,
-                    'educaction': trainer.education,
                     'description': trainer.description,
                     'specialties':trainer.specialties,
                     'role':trainer.role.serialize(),
@@ -507,7 +542,7 @@ def login(role_id):
                     'gender': client.gender,
                     'name': client.name,
                     'lastname': client.lastname,
-                    'photo':client.photo,
+                    'avatar':client.avatar,
                     'active': client.active,
                     'created': client.date_created,
                     'role':client.role.serialize(),
@@ -522,13 +557,16 @@ def login(role_id):
             return jsonify(data), 200
 
 ###    PROFESIONAL ROUTES #### --REGISTER
-@app.route('/profesional/register/<int:role>', methods=['POST']) ##REGISTER PROFESIONAL
+@app.route('/register/profesional/<int:role>', methods=['POST']) ##REGISTER PROFESIONAL
 def profesional_register(role):
         
     email = request.form.get('email')
     password = request.form.get('password')
     name = request.form.get('name')
     lastname = request.form.get('lastname')   
+    age = request.form.get('age')   
+    description = request.form.get('description')   
+    specialties = request.form.get('specialties')   
     
     if not email or email == '':
         return jsonify({"msg":"Missing email field"}),404
@@ -538,27 +576,66 @@ def profesional_register(role):
         return jsonify({"msg":"Missing name field"}),404
     if not lastname or lastname == '':
         return jsonify({"msg":"Missing last name field"}),404  
+    if not age or age == '':
+        return jsonify({"msg":"Missing age field"}),404  
 
     if role == 2:
         nutri = Nutritionist.query.filter_by(email =email).first()
         if nutri:
             return jsonify({"msg":'email already register'}),400
         
-        file = request.files['photo']
-        if file and file.filename!= '' and allowed_files(file.filename, ALLOWED_EXTENSIONS_IMAGES):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar'), filename))
+        avatar = request.files['avatar']
+        if avatar and avatar.filename!= '' and allowed_files(avatar.filename, ALLOWED_EXTENSIONS_IMAGES):
+            filename = secure_filename(avatar.filename)
+            avatar.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar'), filename))
         else:
             return jsonify({"msg":"file is not allowed"}), 400
+            
+        background = request.files['background']
+        if background and background.filename!= '' and allowed_files(background.filename, ALLOWED_EXTENSIONS_FILES):
+            background_filename = secure_filename(background.filename)
+            background.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/background/nutritionist'), background_filename))
+        else:
+            return jsonify({"msg":"file is not allowed"}), 400
+
+        title = request.files['title']
+        if title and title.filename!= '' and allowed_files(title.filename, ALLOWED_EXTENSIONS_FILES):
+            title_filename = secure_filename(title.filename)
+            title.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/profesional_title/nutritionist'), title_filename))
+        else:
+            return jsonify({"msg":"file is not allowed"}), 400
+
+        title_validation = request.files['title_validation']
+        if title_validation and title_validation.filename!= '' and allowed_files(title_validation.filename, ALLOWED_EXTENSIONS_FILES):
+            title_validation_filename = secure_filename(title_validation.filename)
+            title_validation.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/title_validation'), title_validation_filename))
+        else:
+            return jsonify({"msg":"file is not allowed"}), 400
+
+        if not background or background == '':
+            return jsonify({'msg':'background missing'})
+        
+        if not title:
+            return jsonify({'msg':'missing title file'})
+        
+        if not title_validation:
+            return jsonify({'msg':'missing title validation'})
+        
         nutri = Nutritionist()
         nutri.email = email
         nutri.password = bcrypt.generate_password_hash(password)
         nutri.name = name
         nutri.lastname = lastname
         nutri.role_id = role
+        nutri.description = description
+        nutri.specialties = specialties
+        nutri.age = age
+        nutri.background = background_filename
+        nutri.profesional_title = title_filename
+        nutri.nutritionist_validation_title = title_validation_filename
 
-        if file:
-            nutri.photo = filename
+        if avatar:
+            nutri.avatar = filename
         
 
         db.session.add(nutri)
@@ -567,7 +644,7 @@ def profesional_register(role):
         access_token = create_access_token(identity = nutri.email)
         data={
             'access_token': access_token,
-            'profesional': nutri.serialize()
+            'user': nutri.serialize()
         }
         return jsonify(data), 200
     
@@ -576,21 +653,43 @@ def profesional_register(role):
         if trainer:
             return jsonify({"msg":'email already register'}),400
         
-        file = request.files['photo']
-        if file and file.filename!= '' and allowed_files(file.filename, ALLOWED_EXTENSIONS_IMAGES):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar'), filename))
+        avatar = request.files['avatar']
+        if avatar and avatar.filename!= '' and allowed_files(avatar.filename, ALLOWED_EXTENSIONS_IMAGES):
+            filename = secure_filename(avatar.filename)
+            avatar.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar'), filename))
         else:
             return jsonify({"msg":"file is not allowed"}), 400
+            
+        background = request.files['background']
+        if background and background.filename!= '' and allowed_files(background.filename, ALLOWED_EXTENSIONS_FILES):
+            background_filename = secure_filename(background.filename)
+            background.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/background/trainer'), background_filename))
+        else:
+            return jsonify({"msg":"file is not allowed"}), 400
+
+        title = request.files['title']
+        if title and title.filename!= '' and allowed_files(title.filename, ALLOWED_EXTENSIONS_FILES):
+            title_filename = secure_filename(title.filename)
+            title.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/profesional_title/trainer'), title_filename))
+        else:
+            return jsonify({"msg":"file is not allowed"}), 400
+
+        
+
         trainer = Trainer()
         trainer.email = email
         trainer.password = bcrypt.generate_password_hash(password)
         trainer.name = name
         trainer.lastname = lastname
         trainer.role_id = role
+        trainer.description = description
+        trainer.specialties = specialties
+        trainer.age = age
+        trainer.background = background_filename
+        trainer.profesional_title = title_filename
 
-        if file:
-            trainer.photo = filename
+        if avatar:
+            trainer.avatar = filename
     
 
         db.session.add(trainer)
@@ -599,7 +698,7 @@ def profesional_register(role):
         access_token = create_access_token(identity = trainer.email)
         data={
             'access_token': access_token,
-            'profesional': trainer.serialize()
+            'user': trainer.serialize()
         }
         return jsonify(data), 200
 
@@ -626,10 +725,12 @@ def client_register():
     if client:
         return jsonify({"msg":"Email already register"}), 400
     
-    file = request.files['photo']
+    file = request.files['avatar']
     if file and file.filename != '' and allowed_files(file.filename, ALLOWED_EXTENSIONS_IMAGES):
         filename = secure_filename(file.filename)
         file.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar'), filename))
+    else:
+        return jsonify({"msg":"file is not allowed"}), 400
     
     client = Client()
     
@@ -640,15 +741,15 @@ def client_register():
     client.role_id = 4
 
     if file:
-        client.photo = filename
-
+        client.avatar = filename
+    
     db.session.add(client)
     db.session.commit()
 
     access_token = create_access_token(identity=client.email)
     data = {
         'access_token': access_token,
-        'client': client.serialize()
+        'user': client.serialize()
     }
 
     return jsonify(data), 200
@@ -659,18 +760,18 @@ def client_register():
 @app.route('/client/plan/<int:id_client>/<int:plan_id>', methods=['GET'])
 def client_plan(id_client = None, plan_id= None):   
     if request.method == 'GET':
-        client = Client.query.get(client_id)
+        client = Client.query.get(id_client)
         plan = Planes.query.filter_by(id=plan_id).first()
         if not client:
             return jsonify({"msg":"client not found"}), 400
         else:
             if not plan_id:     ### THIS BRINGS EVERY PLAN A CLIENT HAS
-                _client = Planes.query.filter_by(client_id=client_id).all()
+                _client = Planes.query.filter_by(client_id=id_client).all()
                 client_plans= list(map(lambda plan: plan.serialize(), _client))
                 key = client_plans
                 return jsonify (key), 200
             else:               #### THIS BRINGS A SPECIFIC PLAN A CLIENT HAS
-                _client = Planes.query.filter_by(client_id=client_id).all()
+                _client = Planes.query.filter_by(client_id=id_client).all()
                 client_plans= list(map(lambda plan: plan.serialize(), _client))
                 key = client_plans
                 another_key = list(filter(lambda plan: plan if plan['id'] == plan_id else None, key ))
