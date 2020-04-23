@@ -638,7 +638,7 @@ def profesional_register(role):
         background = request.files['background']
         if not background:
             return ({'msg':'please attached your background'})
-        all_backgrounds = Nutritionist.query.filter_by(background=background.filename)
+        all_backgrounds = Nutritionist.query.filter_by(background=background.filename).first()
         if all_backgrounds:
             return jsonify({'msg':'filename already exists, please change the name of your file to the name of your email'})
         if background and background.filename!= '' and allowed_files(background.filename, ALLOWED_EXTENSIONS_FILES):
@@ -649,7 +649,7 @@ def profesional_register(role):
 
         title = request.files['title']
         if not title:
-            return ({'msg':'please attached your profesional title'})
+            return ({'msg':'please attached your profesional title'}).first()
         all_titles = Nutritionist.query.filter_by(profesional_title=title.filename)
         if all_titles:
             return jsonify({'msg':'filename already exists, please change the name of your file to the name of your email'})
@@ -662,7 +662,7 @@ def profesional_register(role):
         title_validation = request.files['title_validation']
         if not title_validation:
             return jsonify({'msg':'please attached you title validation'})
-        all_title_validation = Nutritionist.query.filter_by(nutritionist_validation_title = title_validation.filename )
+        all_title_validation = Nutritionist.query.filter_by(nutritionist_validation_title = title_validation.filename ).first()
         if all_title_validation:
             return jsonify({'msg':'profesional title validation filename already exists, please change the name of your file to the name of your email'})
 
@@ -723,7 +723,7 @@ def profesional_register(role):
         background = request.files['background']
         if not background:
             return ({'msg':'please attached your background'})
-        all_backgrounds = Trainer.query.filter_by(background=background.filename)
+        all_backgrounds = Trainer.query.filter_by(background=background.filename).first()
         if all_backgrounds:
             return jsonify({'msg':' background filename already exists, please change the name of your file to the name of your email'})
         
@@ -736,7 +736,7 @@ def profesional_register(role):
         title = request.files['title']
         if not title:
             return ({'msg':'please attached your profesional title'})
-        all_titles = Trainer.query.filter_by(profesional_title=title.filename)
+        all_titles = Trainer.query.filter_by(profesional_title=title.filename).first()
         if all_titles:
             return jsonify({'msg':'profesional title filename already exists, please change the name of your file to the name of your email'})
         if title and title.filename!= '' and allowed_files(title.filename, ALLOWED_EXTENSIONS_FILES):
