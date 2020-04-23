@@ -194,6 +194,11 @@ class Planes(db.Model):
     peso = db.Column(db.String(100), nullable=True)
     altura = db.Column(db.String(100), nullable=True)
     cintura = db.Column(db.String(100), nullable=True)
+    workout_plan = db.Column(db.String(100), nullable=True )
+    diet_plan = db.Column(db.String(100), nullable=True)
+
+
+    # schedule = db.relationship('Schedule',backref = 'plan_detail', lazy=True)
 
     def serialize(self):
         return {
@@ -226,12 +231,40 @@ class Planes(db.Model):
             'tabaco':self.tabaco,
             'actividad_fisica':self.actividad_fisica,
             'enfermedades':self.enfermedades,
-            'apetito':self.apetito
+            'apetito':self.apetito,
+            'entrenamiento':self.workout_plan,
+            'dieta':self.diet_plan
+            # 'schedule': self.schedule
         }
     
 
 
+# class Schedule(db.Model):
+#     __tablename__ = 'schedule'
+#     id = db.Column(db.Integer, primary_key=True)
+#     schedule_planes_id = db.Column(db.Integer, db.ForeignKey('planes.id'), nullable=False)
+#     schedule_plan_details = db.relationship('Planes')
+#     dia_1 = db.Column(db.String(100), nullable=True)
+#     dia_2 = db.Column(db.String(100), nullable=True)
+#     dia_3 = db.Column(db.String(100), nullable=True)
+#     dia_4 = db.Column(db.String(100), nullable=True)
+#     dia_5 = db.Column(db.String(100), nullable=True)
+#     dia_6 = db.Column(db.String(100), nullable=True)
+#     dia_7 = db.Column(db.String(100), nullable=True)
 
-
-
+#     def serialize(self):
+#         return{
+#             'id': self.id,
+#             'plan_id': self.schedule_planes_id,
+#             'client_id':self.plan_detail.client_id,
+#             'nutritionist_id':self.plan_detail.nutritionist_id,
+#             'trainer_id':self.schedule_plan_details.trainer_id,
+#             'dia 1': self.dia_1,
+#             'dia 2': self.dia_2,
+#             'dia 3': self.dia_3,
+#             'dia 4': self.dia_4,
+#             'dia 5': self.dia_5,
+#             'dia 6': self.dia_6,
+#             'dia 7': self.dia_7
+#         }
     

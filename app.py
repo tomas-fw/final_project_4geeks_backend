@@ -1,5 +1,5 @@
 import os,getpass
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, send_from_directory
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from flask_cors import CORS
@@ -118,8 +118,9 @@ def admin_register():
 ### ADMIN ROUTES ##### GET ALL PROFESIONALS OR SPECIFIC PROFESIONAL BY ID
 @app.route('/admin/profesional', methods=['GET'])
 @app.route('/admin/profesional/<int:role_id>', methods=['GET'])
-@app.route('/admin/profesional/<int:role_id>/<int:id>', methods=['GET','PUT'])
-def admin_profesionals(role_id=None, id = None):
+@app.route('/admin/profesional/<int:role_id>/<int:id>/', methods=['GET','PUT'])
+@app.route('/admin/profesional/<int:role_id>/<int:id>/<document>/<filename>', methods=['GET'])
+def admin_profesionals(role_id=None, id = None, document = None, filename= None):
     if request.method == 'GET':
         if role_id != None and role_id != 2 and role_id != 3:       ### THIS VERIFIES THAT THE ROLE EXISTS WITHIN PROFESIONALS
             return jsonify({"msg":"role input not valid"}), 404
@@ -190,12 +191,22 @@ def admin_profesionals(role_id=None, id = None):
             nutritionists = []
             for nutri in all_nutritionist:
                 obj={
-                    'id':nutri.id,
-                    'email':nutri.email,
-                    'name':nutri.name,
-                    'lastname':nutri.lastname,
-                    'specialties':nutri.specialties,
+                    "id":nutri.id,
+                    'role_id':nutri.role_id,
+                    "email":nutri.email,
+                    "name":nutri.name,
+                    "lastname": nutri.lastname,
+                    "register_date":nutri.date_created,
+                    "specialties": nutri.specialties,
                     'is_active': nutri.active,
+                    "background": nutri.background,
+                    "profesional_title": nutri.profesional_title,
+                    'title_vaidattion':nutri.nutritionist_validation_title,
+                    "specialties": nutri.specialties,
+                    "age": nutri.age,
+                    "lastWork": nutri.lastWork,
+                    "lastWorkyears": nutri.lastWorkyears,
+                    "description": nutri.description,
                     'all_plans':[]
                 }          
                 for plan in nutri.planes_id:
@@ -211,12 +222,21 @@ def admin_profesionals(role_id=None, id = None):
             trainers = []
             for trainer in all_trainers:
                 obj={
-                    'id':trainer.id,
-                    'email':trainer.email,
-                    'name':trainer.name,
-                    'lastname':trainer.lastname,
-                    'specialties':trainer.specialties,
-                    'is_active': trainer.active,
+                    "id":trainer.id,
+                    'role_id':trainer.role_id,
+                    "email":trainer.email,
+                    "name":trainer.name,
+                    "lastname": trainer.lastname,
+                    "register_date":trainer.date_created,
+                    "specialties": trainer.specialties,
+                    'is_active':trainer.active,
+                    "background": trainer.background,
+                    "profesional_title": trainer.profesional_title,
+                    "specialties": trainer.specialties,
+                    "age": trainer.age,
+                    "lastWork": trainer.lastWork,
+                    "lastWorkyears": trainer.lastWorkyears,
+                    "description": trainer.description,
                     'all_plans':[]
                 }
                 for plan in trainer.planes_id:
@@ -227,7 +247,7 @@ def admin_profesionals(role_id=None, id = None):
                 trainers.append(obj)
             return jsonify(trainers)
 
-        if role_id == 2 and id:             ####   THIS BIRNGS UP A SPECIFIC NUTRITIONIST
+        if role_id == 2 and id and document == None:             ####   THIS BIRNGS UP A SPECIFIC NUTRITIONIST
             single_nutritionist = Nutritionist.query.get(id)
             nutritionists = Nutritionist.query.all()
             nutri =[]
@@ -263,7 +283,7 @@ def admin_profesionals(role_id=None, id = None):
                         nutri.append(obj)
                 return jsonify(nutri)
         
-        if role_id == 3 and id:                 #####           THIS BRINGS UP A SPECIFIC TRAINER
+        if role_id == 3 and id and document == None:                 #####           THIS BRINGS UP A SPECIFIC TRAINER
             single_trainer = Trainer.query.get(id)
             all_trainers = Trainer.query.all()
             personal_trainer = []
@@ -298,6 +318,29 @@ def admin_profesionals(role_id=None, id = None):
                         personal_trainer.append(obj)          
                 return jsonify(personal_trainer)
 
+        if role_id == 2 and id and document:
+            if document == 'background':
+                return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'],'images/background/nutritionist'), filename)
+            elif document == 'title':
+                return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'],'images/profesional_title/nutritionist'), filename)
+            elif document == 'title_validation':
+                return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'],'images/title_validation'), filename)
+            else:
+                return jsonify({'msg':'URL input invalid'})
+
+        if role_id == 3 and id and document:
+            if document == 'background':
+                return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'],'images/background/trainer'), filename)
+            elif document == 'title':
+                return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'],'images/profesional_title/trainer'), filename)
+            else:
+                return jsonify({'msg':'URL input invalid'})
+
+
+
+
+
+
     if request.method == 'PUT':
         if role_id != None and role_id != 2 and role_id != 3:       ### THIS VERIFIES THAT THE ROLE EXISTS WITHIN PROFESIONALS
             return jsonify({"msg":"role input not valid"}), 404
@@ -312,7 +355,7 @@ def admin_profesionals(role_id=None, id = None):
                 return jsonify({"msg":"Missing active field"}),404
         
             nutritionist = Nutritionist.query.get(id)
-            nutritionist.active = bool(active)
+            nutritionist.active = False if not active == 'true' else True
 
             db.session.commit()
         
@@ -329,7 +372,7 @@ def admin_profesionals(role_id=None, id = None):
                 return jsonify({"msg":"Missing active field"}),404
         
             trainer = Trainer.query.get(id)
-            trainer.active = bool(active)
+            trainer.active = False if not active == 'true' else True
 
             db.session.commit()
         
@@ -401,7 +444,7 @@ def admin_clients(client_id = None):
             return jsonify({"msg":"Missing name field"}),404
        
         client = Client.query.get(client_id)
-        client.active = active
+        client.active = False if not active == 'true' else True
 
         db.session.commit()
       
@@ -585,6 +628,7 @@ def profesional_register(role):
             return jsonify({"msg":'email already register'}),400
         
         avatar = request.files['avatar']
+        
         if avatar and avatar.filename!= '' and allowed_files(avatar.filename, ALLOWED_EXTENSIONS_IMAGES):
             filename = secure_filename(avatar.filename)
             avatar.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar'), filename))
@@ -592,6 +636,11 @@ def profesional_register(role):
             return jsonify({"msg":"file is not allowed"}), 400
             
         background = request.files['background']
+        if not background:
+            return ({'msg':'please attached your background'})
+        all_backgrounds = Nutritionist.query.filter_by(background=background.filename)
+        if all_backgrounds:
+            return jsonify({'msg':'filename already exists, please change the name of your file to the name of your email'})
         if background and background.filename!= '' and allowed_files(background.filename, ALLOWED_EXTENSIONS_FILES):
             background_filename = secure_filename(background.filename)
             background.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/background/nutritionist'), background_filename))
@@ -599,6 +648,11 @@ def profesional_register(role):
             return jsonify({"msg":"file is not allowed"}), 400
 
         title = request.files['title']
+        if not title:
+            return ({'msg':'please attached your profesional title'})
+        all_titles = Nutritionist.query.filter_by(profesional_title=title.filename)
+        if all_titles:
+            return jsonify({'msg':'filename already exists, please change the name of your file to the name of your email'})
         if title and title.filename!= '' and allowed_files(title.filename, ALLOWED_EXTENSIONS_FILES):
             title_filename = secure_filename(title.filename)
             title.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/profesional_title/nutritionist'), title_filename))
@@ -606,6 +660,12 @@ def profesional_register(role):
             return jsonify({"msg":"file is not allowed"}), 400
 
         title_validation = request.files['title_validation']
+        if not title_validation:
+            return jsonify({'msg':'please attached you title validation'})
+        all_title_validation = Nutritionist.query.filter_by(nutritionist_validation_title = title_validation.filename )
+        if all_title_validation:
+            return jsonify({'msg':'profesional title validation filename already exists, please change the name of your file to the name of your email'})
+
         if title_validation and title_validation.filename!= '' and allowed_files(title_validation.filename, ALLOWED_EXTENSIONS_FILES):
             title_validation_filename = secure_filename(title_validation.filename)
             title_validation.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/title_validation'), title_validation_filename))
@@ -661,6 +721,12 @@ def profesional_register(role):
             return jsonify({"msg":"file is not allowed"}), 400
             
         background = request.files['background']
+        if not background:
+            return ({'msg':'please attached your background'})
+        all_backgrounds = Trainer.query.filter_by(background=background.filename)
+        if all_backgrounds:
+            return jsonify({'msg':' background filename already exists, please change the name of your file to the name of your email'})
+        
         if background and background.filename!= '' and allowed_files(background.filename, ALLOWED_EXTENSIONS_FILES):
             background_filename = secure_filename(background.filename)
             background.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/background/trainer'), background_filename))
@@ -668,6 +734,11 @@ def profesional_register(role):
             return jsonify({"msg":"file is not allowed"}), 400
 
         title = request.files['title']
+        if not title:
+            return ({'msg':'please attached your profesional title'})
+        all_titles = Trainer.query.filter_by(profesional_title=title.filename)
+        if all_titles:
+            return jsonify({'msg':'profesional title filename already exists, please change the name of your file to the name of your email'})
         if title and title.filename!= '' and allowed_files(title.filename, ALLOWED_EXTENSIONS_FILES):
             title_filename = secure_filename(title.filename)
             title.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/profesional_title/trainer'), title_filename))
@@ -703,6 +774,55 @@ def profesional_register(role):
         return jsonify(data), 200
 
 
+###    PROFESIONAL CREATE A WORKOUT AND DIET PLAN       #####
+
+@app.route('/profesional/<int:role_id>/<int:plan_id>', methods=['POST'])
+def profesional_plan(role_id = None, plan_id =None):
+    if not role_id:
+        return jsonify({'msg':'missing role input'})
+    if role_id == 2:
+
+        diet = request.files['diet']
+        if not diet:
+            return jsonify({'msg':'missing diet plan'})
+        all_diets = Planes.query.filter_by(diet_plan=diet.filename).first()
+        if all_diets:
+            return({'msg':'filename already exists, try changing it to a more unique name '})
+        if diet and diet.filename!= '' and allowed_files(diet.filename, ALLOWED_EXTENSIONS_FILES):
+            filename = secure_filename(diet.filename)
+            diet.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'diets'), filename))
+        else:
+            return jsonify({"msg":"file is not allowed"}), 400
+        
+        diet_plan = Planes.query.get(plan_id)
+        diet_plan.diet_plan = filename
+            
+        db.session.commit()
+        return jsonify(filename)
+
+    if role_id == 3:
+
+        workout = request.files['workout']
+        if not workout:
+            return jsonify({'msg':'missing workout plan'})
+        all_workouts = Planes.query.filter_by(workout_plan=workout.filename).first()
+        if all_workouts:
+            return({'msg':'filename already exists, try changing it to a more unique name '})
+        if workout and workout.filename!= '' and allowed_files(workout.filename, ALLOWED_EXTENSIONS_FILES):
+            filename = secure_filename(workout.filename)
+            workout.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'workouts'), filename))
+        else:
+            return jsonify({"msg":"file is not allowed"}), 400
+        
+        workout_plan = Planes.query.get(plan_id)
+        workout_plan.workout_plan = filename
+        
+        db.session.commit()
+        return jsonify(filename)
+
+
+
+
 ###    CLIENT ROUTES   #### -- REGISTER
 @app.route('/register/client', methods=['POST'])        ### REGISTER CLIENT
 def client_register():
@@ -711,6 +831,8 @@ def client_register():
     password = request.form.get('password')
     name = request.form.get('name')
     lastname = request.form.get('lastname')
+    oldfilename = request.form.get('oldfilename')
+    
 
     if not email or email == '':
         return jsonify({"msg":"Missing email field"}), 404
@@ -728,9 +850,14 @@ def client_register():
     file = request.files['avatar']
     if file and file.filename != '' and allowed_files(file.filename, ALLOWED_EXTENSIONS_IMAGES):
         filename = secure_filename(file.filename)
-        file.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar'), filename))
+        file.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar/clients'), filename))
+        # if oldfilename != 'default_profile.png':
+        #     if os.file.exists(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar/clients'), oldfilename)):
+        #         os.remove(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar/clients'), oldfilename))
+        
     else:
         return jsonify({"msg":"file is not allowed"}), 400
+        
     
     client = Client()
     
@@ -758,7 +885,8 @@ def client_register():
 ###    CLIENT ROUTES   #### -- CLIENT CREATE PLAN AND CHECK HIS PLANNES OR SPECIFIC PLAN PER CLIENT
 @app.route('/client/plan/<int:id_client>', methods=['GET','POST'])
 @app.route('/client/plan/<int:id_client>/<int:plan_id>', methods=['GET'])
-def client_plan(id_client = None, plan_id= None):   
+@app.route('/client/plan/<int:id_client>/<int:plan_id>/<schedule>/<filename>', methods=['GET'])
+def client_plan(id_client = None, plan_id= None, schedule = None, filename = None):   
     if request.method == 'GET':
         client = Client.query.get(id_client)
         plan = Planes.query.filter_by(id=plan_id).first()
@@ -770,7 +898,7 @@ def client_plan(id_client = None, plan_id= None):
                 client_plans= list(map(lambda plan: plan.serialize(), _client))
                 key = client_plans
                 return jsonify (key), 200
-            else:               #### THIS BRINGS A SPECIFIC PLAN A CLIENT HAS
+            elif plan_id and schedule == None:               #### THIS BRINGS A SPECIFIC PLAN A CLIENT HAS
                 _client = Planes.query.filter_by(client_id=id_client).all()
                 client_plans= list(map(lambda plan: plan.serialize(), _client))
                 key = client_plans
@@ -778,6 +906,17 @@ def client_plan(id_client = None, plan_id= None):
                 if not another_key:
                     return jsonify({"msg":"plan does not exist"})                
                 return jsonify(another_key), 200
+            
+            else:
+                if schedule == 'workout':
+                    return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'],'workouts'), filename)
+                elif schedule == 'diet':
+                    return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'],'diets'), filename) 
+                else:
+                    return jsonify({'msg':'Invalid request, you url must contain either "workout" or "diet"'})      
+
+
+
 
     if request.method == 'POST':        #### THIS ALLOWS CLIENT TO CREATE PLAN
         if not request.is_json:
@@ -857,8 +996,13 @@ def client_plan(id_client = None, plan_id= None):
 
         return jsonify(plan.serialize()),200
 
+# @app.route('/plan/workout/<filename>')
+# def workout(filename):
+#     return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'],'workouts'), filename)       
+# @app.route('/plan/diet/<filename>')
+# def diet(filename):
+#     return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'],'diets'), filename)       
 
-        
 
 @manager.command
 def loadroles():
