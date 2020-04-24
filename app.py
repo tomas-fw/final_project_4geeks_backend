@@ -115,7 +115,7 @@ def admin_register():
     return jsonify(data), 200
 
 
-### ADMIN ROUTES ##### GET ALL PROFESIONALS OR SPECIFIC PROFESIONAL BY ID
+### ADMIN ROUTES ##### GET ALL PROFESIONALS OR SPECIFIC PROFESIONAL BY ID, AND ALSO THE FILES THEY UPLOAD
 @app.route('/admin/profesional', methods=['GET'])
 @app.route('/admin/profesional/<int:role_id>', methods=['GET'])
 @app.route('/admin/profesional/<int:role_id>/<int:id>/', methods=['GET','PUT'])
@@ -138,6 +138,7 @@ def admin_profesionals(role_id=None, id = None, document = None, filename= None)
                     "email":trainer.email,
                     "name":trainer.name,
                     "lastname": trainer.lastname,
+                    'avatar':trainer.avatar,
                     "register_date":trainer.date_created,
                     "specialties": trainer.specialties,
                     'is_active':trainer.active,
@@ -164,6 +165,7 @@ def admin_profesionals(role_id=None, id = None, document = None, filename= None)
                     "email":nutri.email,
                     "name":nutri.name,
                     "lastname": nutri.lastname,
+                    'avatar':nutri.avatar,
                     "register_date":nutri.date_created,
                     "specialties": nutri.specialties,
                     'is_active': nutri.active,
@@ -196,6 +198,7 @@ def admin_profesionals(role_id=None, id = None, document = None, filename= None)
                     "email":nutri.email,
                     "name":nutri.name,
                     "lastname": nutri.lastname,
+                    'avatar':nutri.avatar,
                     "register_date":nutri.date_created,
                     "specialties": nutri.specialties,
                     'is_active': nutri.active,
@@ -227,6 +230,7 @@ def admin_profesionals(role_id=None, id = None, document = None, filename= None)
                     "email":trainer.email,
                     "name":trainer.name,
                     "lastname": trainer.lastname,
+                    'avatar':trainer.avatar,
                     "register_date":trainer.date_created,
                     "specialties": trainer.specialties,
                     'is_active':trainer.active,
@@ -262,6 +266,7 @@ def admin_profesionals(role_id=None, id = None, document = None, filename= None)
                             "email":nutritionist.email,
                             "name":nutritionist.name,
                             "lastname": nutritionist.lastname,
+                            'avatar':nutritionist.avatar,
                             "register_date":nutritionist.date_created,
                             "specialties": nutritionist.specialties,
                             'is_active': nutritionist.active,
@@ -298,6 +303,7 @@ def admin_profesionals(role_id=None, id = None, document = None, filename= None)
                             "email":trainer.email,
                             "name":trainer.name,
                             "lastname": trainer.lastname,
+                            'avatar':trainer.avatar,
                             "register_date":trainer.date_created,
                             "specialties": trainer.specialties,
                             'is_active':trainer.active,
@@ -393,6 +399,7 @@ def admin_clients(client_id = None):
                     "email": client.email,
                     "name":client.name,
                     "last_name": client.lastname,
+                    'avatar': client.avatar,
                     "date_created": client.date_created,
                     "is_active":client.active,
                     "all_plans":[]
@@ -420,6 +427,7 @@ def admin_clients(client_id = None):
                             "email": client.email,
                             "name":client.name,
                             "last_name": client.lastname,
+                            'avatar': client.avatar,
                             "date_created": client.date_created,
                             "is_active":client.active,
                             "all_plans":[]
@@ -628,10 +636,13 @@ def profesional_register(role):
             return jsonify({"msg":'email already register'}),400
         
         avatar = request.files['avatar']
+        all_avatars = Nutritionist.query.filter_by(avatar=avatar.filename).first()
+        if all_avatars:
+            return jsonify({'msg':'please change name of profile card to you RUT number'}), 400
         
         if avatar and avatar.filename!= '' and allowed_files(avatar.filename, ALLOWED_EXTENSIONS_IMAGES):
             filename = secure_filename(avatar.filename)
-            avatar.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar'), filename))
+            avatar.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar/nutritionist'), filename)), 400
         else:
             return jsonify({"msg":"file is not allowed"}), 400
             
@@ -640,7 +651,7 @@ def profesional_register(role):
             return ({'msg':'please attached your background'})
         all_backgrounds = Nutritionist.query.filter_by(background=background.filename).first()
         if all_backgrounds:
-            return jsonify({'msg':'filename already exists, please change the name of your file to the name of your email'})
+            return jsonify({'msg':'filename already exists, please change the name of your file to the name of your email'}), 400
         if background and background.filename!= '' and allowed_files(background.filename, ALLOWED_EXTENSIONS_FILES):
             background_filename = secure_filename(background.filename)
             background.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/background/nutritionist'), background_filename))
@@ -650,9 +661,9 @@ def profesional_register(role):
         title = request.files['title']
         if not title:
             return ({'msg':'please attached your profesional title'}).first()
-        all_titles = Nutritionist.query.filter_by(profesional_title=title.filename)
+        all_titles = Nutritionist.query.filter_by(profesional_title=title.filename).first()
         if all_titles:
-            return jsonify({'msg':'filename already exists, please change the name of your file to the name of your email'})
+            return jsonify({'msg':'filename already exists, please change the name of your file to the name of your email'}), 400
         if title and title.filename!= '' and allowed_files(title.filename, ALLOWED_EXTENSIONS_FILES):
             title_filename = secure_filename(title.filename)
             title.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/profesional_title/nutritionist'), title_filename))
@@ -714,9 +725,12 @@ def profesional_register(role):
             return jsonify({"msg":'email already register'}),400
         
         avatar = request.files['avatar']
+        all_avatars = Trainer.query.filter_by(avatar=avatar.filename).first()
+        if all_avatars:
+            return jsonify({'msg':'please change name of profile card to you RUT number'}), 400
         if avatar and avatar.filename!= '' and allowed_files(avatar.filename, ALLOWED_EXTENSIONS_IMAGES):
             filename = secure_filename(avatar.filename)
-            avatar.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar'), filename))
+            avatar.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar/trainer'), filename))
         else:
             return jsonify({"msg":"file is not allowed"}), 400
             
@@ -725,7 +739,7 @@ def profesional_register(role):
             return ({'msg':'please attached your background'})
         all_backgrounds = Trainer.query.filter_by(background=background.filename).first()
         if all_backgrounds:
-            return jsonify({'msg':' background filename already exists, please change the name of your file to the name of your email'})
+            return jsonify({'msg':' background filename already exists, please change the name of your file to the name of your email'}), 400
         
         if background and background.filename!= '' and allowed_files(background.filename, ALLOWED_EXTENSIONS_FILES):
             background_filename = secure_filename(background.filename)
@@ -738,7 +752,7 @@ def profesional_register(role):
             return ({'msg':'please attached your profesional title'})
         all_titles = Trainer.query.filter_by(profesional_title=title.filename).first()
         if all_titles:
-            return jsonify({'msg':'profesional title filename already exists, please change the name of your file to the name of your email'})
+            return jsonify({'msg':'profesional title filename already exists, please change the name of your file to the name of your email'}),400
         if title and title.filename!= '' and allowed_files(title.filename, ALLOWED_EXTENSIONS_FILES):
             title_filename = secure_filename(title.filename)
             title.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/profesional_title/trainer'), title_filename))
@@ -777,7 +791,7 @@ def profesional_register(role):
 ###    PROFESIONAL CREATE A WORKOUT AND DIET PLAN       #####
 
 @app.route('/profesional/<int:role_id>/<int:plan_id>', methods=['POST'])
-def profesional_plan(role_id = None, plan_id =None):
+def profesional_plan(role_id, plan_id):
     if not role_id:
         return jsonify({'msg':'missing role input'})
     if role_id == 2:
@@ -848,6 +862,9 @@ def client_register():
         return jsonify({"msg":"Email already register"}), 400
     
     file = request.files['avatar']
+    all_avatars = Client.query.filter_by(avatar=file.filename).first()
+    if all_avatars:
+        return jsonify({'msg':'please change name of profile card to you RUT number'}), 400
     if file and file.filename != '' and allowed_files(file.filename, ALLOWED_EXTENSIONS_IMAGES):
         filename = secure_filename(file.filename)
         file.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar/clients'), filename))
@@ -1002,6 +1019,22 @@ def client_plan(id_client = None, plan_id= None, schedule = None, filename = Non
 # @app.route('/plan/diet/<filename>')
 # def diet(filename):
 #     return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'],'diets'), filename)       
+
+
+### GET ALL AVATARS     ######
+
+@app.route('/avatar/<int:role_id>/<filename>', methods=['GET'])
+def get_avatar(role_id, filename):
+    if role_id:
+        if role_id == 2:
+            return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'],'images/avatar/nutritionist'), filename)
+        if role_id == 3:        
+            return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'],'images/avatar/trainer'), filename)
+        if role_id == 4:        
+            return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'],'images/avatar/clients'), filename)
+        else:
+            return jsonify({'msg':'goa'})
+    
 
 
 @manager.command
