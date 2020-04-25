@@ -34,7 +34,7 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_DEBUG'] = True
 app.config['MAIL_USERNAME'] = 'fit.good.app@gmail.com'
-app.config['MAIL_PASSWORD'] = ''
+app.config['MAIL_PASSWORD'] = 'dajato2020'
 app.config['MAIL_DEFAULT_SENDER'] = ('Javiera de Fit Good App','fit.good.app@gmail.com')
 app.config['MAIL_MAX_EMAILS'] = None
 app.config['MAI_ASCII_ATTACHMENTS'] = False
@@ -967,6 +967,7 @@ def client_plan(id_client = None, plan_id= None, schedule = None, filename = Non
 
         objective = request.json.get('objective')
         client_id = request.json.get('client_id')
+        client_email = request.json.get('client_email')
         nutritionist_email = request.json.get('nutritionist_email')
         trainer_email = request.json.get('trainer_email')
         actividad_fisica = request.json.get('actividad_fisica')
@@ -1011,6 +1012,7 @@ def client_plan(id_client = None, plan_id= None, schedule = None, filename = Non
         plan = Planes()
         plan.objective = objective
         plan.client_id = client_id
+        plan.client_email = client_email
         plan.nutritionist_email = nutritionist_email
         plan.trainer_email = trainer_email
         plan.actividad_fisica= actividad_fisica
@@ -1038,7 +1040,7 @@ def client_plan(id_client = None, plan_id= None, schedule = None, filename = Non
         db.session.commit()
 
         msg = Message('Haz sido contratado para un nuevo plan', recipients=['fit.good.app@gmail.com',mail_client,mail_trainer,mail_nutritionist])
-        msg.body = 'Esto es una prueba'
+        msg.body = 'Haz contratado un nuevo plan, el nombre de tu entrenador es ' + plan.trainer.name + ' , el nombre de tu nutricionista es ' + plan.nutritionist.name
 
         
         mail.send(msg)

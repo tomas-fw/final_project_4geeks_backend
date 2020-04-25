@@ -205,7 +205,7 @@ class Planes(db.Model):
             "id": self.id,
             "client_id": self.client_detail.id,
             'client_email':self.client_email,
-            # 'client_name':self.client_detail.name,
+            'client_name':self.client_detail.name,
             "nutritionist_id": self.nutritionist.id,
             "nutritionist_email": self.nutritionist_email,
             'nutritionist_name':self.nutritionist.name,
