@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 047654859970
+Revision ID: cf25909484f5
 Revises: 
-Create Date: 2020-04-24 14:55:33.994173
+Create Date: 2020-04-24 21:35:51.200345
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '047654859970'
+revision = 'cf25909484f5'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -98,9 +98,9 @@ def upgrade():
     )
     op.create_table('planes',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('client_id', sa.Integer(), nullable=False),
-    sa.Column('nutritionist_id', sa.Integer(), nullable=False),
-    sa.Column('trainer_id', sa.Integer(), nullable=False),
+    sa.Column('client_email', sa.Integer(), nullable=False),
+    sa.Column('nutritionist_email', sa.Integer(), nullable=False),
+    sa.Column('trainer_email', sa.Integer(), nullable=False),
     sa.Column('objective', sa.String(length=250), nullable=False),
     sa.Column('comment', sa.Text(), nullable=True),
     sa.Column('date_created', sa.DateTime(), nullable=False),
@@ -126,9 +126,9 @@ def upgrade():
     sa.Column('cintura', sa.String(length=100), nullable=True),
     sa.Column('workout_plan', sa.String(length=100), nullable=True),
     sa.Column('diet_plan', sa.String(length=100), nullable=True),
-    sa.ForeignKeyConstraint(['client_id'], ['client.id'], ),
-    sa.ForeignKeyConstraint(['nutritionist_id'], ['nutritionist.id'], ),
-    sa.ForeignKeyConstraint(['trainer_id'], ['trainer.id'], ),
+    sa.ForeignKeyConstraint(['client_email'], ['client.email'], ),
+    sa.ForeignKeyConstraint(['nutritionist_email'], ['nutritionist.email'], ),
+    sa.ForeignKeyConstraint(['trainer_email'], ['trainer.email'], ),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###

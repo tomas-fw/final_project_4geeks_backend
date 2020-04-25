@@ -14,11 +14,13 @@ from functions import allowed_files
 from werkzeug.utils import secure_filename
 
 
+
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 ALLOWED_EXTENSIONS_IMAGES = {'png','jpg','jpeg', 'gif', 'svg'}
 ALLOWED_EXTENSIONS_FILES = {'png','jpg','jpeg', 'gif', 'svg', 'pdf'}
 
 app = Flask(__name__)
+
 app.url_map.strict_slashes = False
 app.config['DEBUG'] = True
 app.config['ENV'] = 'development'
@@ -26,6 +28,16 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'super-secret'
 app.config['UPLOAD_FOLDER'] = os.path.join(BASE_DIR, 'static')
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_DEBUG'] = True
+app.config['MAIL_USERNAME'] = 'fit.good.app@gmail.com'
+app.config['MAIL_PASSWORD'] = 'dajato2020'
+app.config['MAIL_DEFAULT_SENDER'] = ('Javiera de Fit Good App','fit.good.app@gmail.com')
+app.config['MAIL_MAX_EMAILS'] = None
+app.config['MAI_ASCII_ATTACHMENTS'] = False
 
 jwt = JWTManager(app)
 
@@ -33,8 +45,21 @@ db.init_app(app)
 Migrate(app,db)
 CORS(app)
 bcrypt = Bcrypt(app)
+mail = Mail(app)
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
+
+
+@app.route('/email/<client_mail>/<trainer_mail>/<nutritionist_mail>')
+def notify(client_mail,trainer_mail,nutritionist_mail):
+    msg = Message('Haz sido contratado para un nuevo plan', recipients=['fit.good.app@gmail.com',client_mail,trainer_mail,nutritionist_mail])
+    msg.body = 'Esto es una prueba'
+
+    
+    mail.send(msg)
+
+    return jsonify({'msg':'email sent'})
+
 
 @app.route('/')
 def index():
@@ -900,10 +925,11 @@ def client_register():
     
 
 ###    CLIENT ROUTES   #### -- CLIENT CREATE PLAN AND CHECK HIS PLANNES OR SPECIFIC PLAN PER CLIENT
-@app.route('/client/plan/<int:id_client>', methods=['GET','POST'])
+@app.route('/client/plan/<int:id_client>', methods=['GET'])
 @app.route('/client/plan/<int:id_client>/<int:plan_id>', methods=['GET'])
 @app.route('/client/plan/<int:id_client>/<int:plan_id>/<schedule>/<filename>', methods=['GET'])
-def client_plan(id_client = None, plan_id= None, schedule = None, filename = None):   
+@app.route('/client/plan/<int:id_client>/<mail_client>/<mail_trainer>/<mail_nutritionist>', methods=['POST'])
+def client_plan(id_client = None, plan_id= None, schedule = None, filename = None, mail_client = None ,mail_trainer= None ,mail_nutritionist= None):   
     if request.method == 'GET':
         client = Client.query.get(id_client)
         plan = Planes.query.filter_by(id=plan_id).first()
@@ -941,8 +967,8 @@ def client_plan(id_client = None, plan_id= None, schedule = None, filename = Non
 
         objective = request.json.get('objective')
         client_id = request.json.get('client_id')
-        nutritionist_id = request.json.get('nutritionist_id')
-        trainer_id = request.json.get('trainer_id')
+        nutritionist_email = request.json.get('nutritionist_email')
+        trainer_email = request.json.get('trainer_email')
         actividad_fisica = request.json.get('actividad_fisica')
         alcohol = request.json.get('alcohol')
         alergias = request.json.get('alergias')
@@ -972,21 +998,21 @@ def client_plan(id_client = None, plan_id= None, schedule = None, filename = Non
             return jsonify({'msg':'Client does not exists in database'})
         if not  client_id == id_client:
             return jsonify({'msg':'Client id must match client id in url'})
-        if not nutritionist_id or nutritionist_id == '':
+        if not nutritionist_email or nutritionist_email == '':
             return jsonify({'msg':'Missing nutritionist'}), 400
-        if not Nutritionist.query.filter_by(id =nutritionist_id).all():
+        if not Nutritionist.query.filter_by(email = nutritionist_email).all():
             return jsonify({"msg":"Nutritionist does not exist in database"})
-        if not trainer_id or trainer_id == '':
+        if not trainer_email or trainer_email == '':
             return jsonify({'msg':'Missing trainer'}), 400
-        if not Trainer.query.filter_by(id=trainer_id).all():
+        if not Trainer.query.filter_by(email=trainer_email).all():
             return jsonify({'msg':"Trainer does not exist in database"})        
                     
         
         plan = Planes()
         plan.objective = objective
         plan.client_id = client_id
-        plan.nutritionist_id = nutritionist_id
-        plan.trainer_id = trainer_id
+        plan.nutritionist_email = nutritionist_email
+        plan.trainer_email = trainer_email
         plan.actividad_fisica= actividad_fisica
         plan.alcohol = alcohol
         plan.alergia = alergias
@@ -1010,6 +1036,13 @@ def client_plan(id_client = None, plan_id= None, schedule = None, filename = Non
 
         db.session.add(plan)
         db.session.commit()
+
+        msg = Message('Haz sido contratado para un nuevo plan', recipients=['fit.good.app@gmail.com',mail_client,mail_trainer,mail_nutritionist])
+        msg.body = 'Esto es una prueba'
+
+        
+        mail.send(msg)
+
 
         return jsonify(plan.serialize()),200
 

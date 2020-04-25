@@ -165,9 +165,9 @@ class Trainer(db.Model):
 class Planes(db.Model):
     __tablename__ = 'planes'
     id = db.Column(db.Integer, primary_key=True)
-    client_id = db.Column(db.Integer, db.ForeignKey('client.id'), nullable=False)
-    nutritionist_id = db.Column(db.Integer, db.ForeignKey('nutritionist.id'), nullable=False)
-    trainer_id = db.Column(db.Integer, db.ForeignKey('trainer.id',), nullable=False)
+    client_email = db.Column(db.Integer, db.ForeignKey('client.email'), nullable=False)
+    nutritionist_email = db.Column(db.Integer, db.ForeignKey('nutritionist.email'), nullable=False)
+    trainer_email = db.Column(db.Integer, db.ForeignKey('trainer.email',), nullable=False)
     client = db.relationship('Client')
     nutritionist = db.relationship('Nutritionist')
     trainer = db.relationship('Trainer')
@@ -203,12 +203,15 @@ class Planes(db.Model):
     def serialize(self):
         return {
             "id": self.id,
-            "client_id": self.client_id,
-            'client_name':self.client_detail.name,
-            "nutritionist_id": self.nutritionist_id,
+            "client_id": self.client_detail.id,
+            'client_email':self.client_email,
+            # 'client_name':self.client_detail.name,
+            "nutritionist_id": self.nutritionist.id,
+            "nutritionist_email": self.nutritionist_email,
             'nutritionist_name':self.nutritionist.name,
             'nutritionist_last_name':self.nutritionist.lastname,
-            "trainer_id": self.trainer_id,
+            "trainer_id": self.trainer.id,
+            "trainer_email": self.trainer_email,
             'trainer_name':self.trainer.name,
             'trainer_last_name':self.trainer.lastname,
             "objective" : self.objective,
