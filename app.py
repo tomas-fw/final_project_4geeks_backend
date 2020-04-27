@@ -34,7 +34,7 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_DEBUG'] = True
 app.config['MAIL_USERNAME'] = 'fit.good.app@gmail.com'
-app.config['MAIL_PASSWORD'] = ''
+app.config['MAIL_PASSWORD'] = 'dajato2020'
 app.config['MAIL_DEFAULT_SENDER'] = ('Javiera de Fit Good App','fit.good.app@gmail.com')
 app.config['MAIL_MAX_EMAILS'] = None
 app.config['MAI_ASCII_ATTACHMENTS'] = False
@@ -1068,7 +1068,7 @@ def get_avatar(role_id, filename):
         if role_id == 4:        
             return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'],'images/avatar/clients'), filename)
         else:
-            return jsonify({'msg':'goa'})
+            return jsonify({'msg':'error'})
     
 
 

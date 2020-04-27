@@ -165,7 +165,7 @@ class Trainer(db.Model):
 class Planes(db.Model):
     __tablename__ = 'planes'
     id = db.Column(db.Integer, primary_key=True)
-    client_email = db.Column(db.Integer, db.ForeignKey('client.email'), nullable=False)
+    client_id = db.Column(db.Integer, db.ForeignKey('client.id'), nullable=False)
     nutritionist_email = db.Column(db.Integer, db.ForeignKey('nutritionist.email'), nullable=False)
     trainer_email = db.Column(db.Integer, db.ForeignKey('trainer.email',), nullable=False)
     client = db.relationship('Client')
@@ -204,7 +204,7 @@ class Planes(db.Model):
         return {
             "id": self.id,
             "client_id": self.client_detail.id,
-            'client_email':self.client_email,
+            'client_email':self.client_detail.email,
             'client_name':self.client_detail.name,
             "nutritionist_id": self.nutritionist.id,
             "nutritionist_email": self.nutritionist_email,
