@@ -34,7 +34,7 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_DEBUG'] = True
 app.config['MAIL_USERNAME'] = 'fit.good.app@gmail.com'
-app.config['MAIL_PASSWORD'] = ''
+app.config['MAIL_PASSWORD'] = 'dajato2020'
 app.config['MAIL_DEFAULT_SENDER'] = ('Javiera de Fit Good App','fit.good.app@gmail.com')
 app.config['MAIL_MAX_EMAILS'] = None
 app.config['MAI_ASCII_ATTACHMENTS'] = False
@@ -369,9 +369,6 @@ def admin_profesionals(role_id=None, id = None, document = None, filename= None)
 
 
 
-
-
-
     if request.method == 'PUT':
         if role_id != None and role_id != 2 and role_id != 3:       ### THIS VERIFIES THAT THE ROLE EXISTS WITHIN PROFESIONALS
             return jsonify({"msg":"role input not valid"}), 404
@@ -483,15 +480,7 @@ def admin_clients(client_id = None):
       
         return jsonify(client.active), 200
 
-    if request.method == 'DELETE':          #### THIS ONE DOESN'T WORK BECAUSE CANNOT DELETE FOREIGNKEY CONSTRAIN NULL,(DEPENDENCIES FROM OTHER TABLES)
-        client = Client.query.get(client_id)
-        if not client:
-            return jsonify({"msg":"Client not found"})
-        
-        db.session.delete(client)
-        db.session.commit()
-
-        return jsonify({"msg":"client deleted from database"})
+   
 
 
 ###LOGIN ROUTES FOR PROFESIONALS AND CLIENTS
