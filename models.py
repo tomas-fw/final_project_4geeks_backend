@@ -46,6 +46,8 @@ class Client(db.Model):
     lastname = db.Column(db.String(100), nullable=False)
     gender = db.Column(db.String(100), nullable=True)
     email = db.Column(db.String(100), unique=True, nullable=False)
+    client_trainer = db.relationship('ClientTrainer', backref='client_author', lazy=True)
+    client_nutritionist = db.relationship('ClientNutritionist', backref='client_author', lazy=True)
     # objective = db.relationship('Objective', backref ='client_detail', lazy=True)
     # age = db.Column(db.Integer, nullable=True)
     avatar = db.Column(db.String(100), nullable=True, default='default_profile.png')
@@ -74,6 +76,7 @@ class Nutritionist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
     planes_id = db.relationship('Planes', backref = 'nutritionist_detail', lazy=True)
+    client_trainer = db.relationship('ClientNutritionist', backref='nutritionist_author', lazy=True)
     password = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     name = db.Column(db.String(100), nullable=False)
@@ -135,6 +138,7 @@ class Trainer(db.Model):
     lastWorkyears = db.Column(db.Integer, nullable=True)
     description = db.Column(db.Text, nullable=True)
     role = db.relationship(Role)
+    client_trainer = db.relationship('ClientTrainer', backref='trainer_author', lazy=True)
     date_created = db.Column(db.DateTime, nullable = False, default = datetime.utcnow )
     active = db.Column(db.Boolean, nullable=True , default = False)
 
@@ -208,12 +212,12 @@ class Planes(db.Model):
             'client_name':self.client_detail.name,
             "nutritionist_id": self.nutritionist.id,
             "nutritionist_email": self.nutritionist_email,
-            'nutritionist_name':self.nutritionist.name,
-            'nutritionist_last_name':self.nutritionist.lastname,
+            'nutritionist_name':self.nutritionist_detail.name,
+            'nutritionist_last_name':self.nutritionist_detail.lastname,
             "trainer_id": self.trainer.id,
             "trainer_email": self.trainer_email,
-            'trainer_name':self.trainer.name,
-            'trainer_last_name':self.trainer.lastname,
+            'trainer_name':self.trainer_detail.name,
+            'trainer_last_name':self.trainer_detail.lastname,
             "objective" : self.objective,
             "comment" : self.comment,
             "created" : self.date_created,
@@ -244,6 +248,52 @@ class Planes(db.Model):
     
 
 
+class ClientTrainer(db.Model):
+    __tablename__='client_trainer'
+    id = db.Column(db.Integer, primary_key=True)
+    client_email = db.Column(db.Integer, db.ForeignKey('client.email'), nullable=False)
+    trainer_email = db.Column(db.Integer, db.ForeignKey('trainer.email'), nullable=False)
+    plan_id = db.Column(db.Integer, db.ForeignKey('planes.id'), nullable=False)
+    comment = db.Column(db.String(250), nullable=True)
+    date_created = db.Column(db.DateTime, nullable = False, default = datetime.utcnow)
+
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'plan_id': self.plan_id,
+            'client_email':self.client_email,
+            'client_name':self.client_author.name,
+            'client_lastname':self.client_author.lastname,
+            'trainer_email':self.trainer_email,
+            'trainer_name':self.trainer_author.name,
+            'trainer_lastname':self.trainer_author.lastname,
+            'comment':self.comment,
+            'date_created':self.date_created
+        }
+class ClientNutritionist(db.Model):
+    __tablename__='client_nutritionist'
+    id = db.Column(db.Integer, primary_key=True)
+    client_email = db.Column(db.Integer, db.ForeignKey('client.email'), nullable=False)
+    nutritionist_email = db.Column(db.Integer, db.ForeignKey('nutritionist.email'), nullable=False)
+    plan_id = db.Column(db.Integer, db.ForeignKey('planes.id'), nullable=False)
+    comment = db.Column(db.String(250), nullable=True)
+    date_created = db.Column(db.DateTime, nullable = False, default = datetime.utcnow)
+
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'plan_id': self.plan_id,
+            'client_email':self.client_email,
+            'client_name':self.client_author.name,
+            'client_lastname':self.client_author.lastname,
+            'nutritionist_email':self.nutritionist_email,
+            'nutritionist_name':self.nutritionist_author.name,
+            'nutritionist_lastname':self.nutritionist_author.lastname,
+            'comment':self.comment,
+            'date_created':self.date_created
+        }
 # class Schedule(db.Model):
 #     __tablename__ = 'schedule'
 #     id = db.Column(db.Integer, primary_key=True)

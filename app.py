@@ -5,7 +5,7 @@ from flask_migrate import Migrate, MigrateCommand
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from flask_mail import Mail, Message
-from models import db, Role, Admin, Nutritionist, Trainer, Client, Planes
+from models import db, Role, Admin, Nutritionist, Trainer, Client, Planes, ClientTrainer, ClientNutritionist
 from flask_jwt_extended import(
     JWTManager, get_jwt_identity, create_access_token,
     jwt_required
@@ -50,15 +50,15 @@ manager = Manager(app)
 manager.add_command('db', MigrateCommand)
 
 
-@app.route('/email/<client_mail>/<trainer_mail>/<nutritionist_mail>')
-def notify(client_mail,trainer_mail,nutritionist_mail):
-    msg = Message('Haz sido contratado para un nuevo plan', recipients=['fit.good.app@gmail.com',client_mail,trainer_mail,nutritionist_mail])
-    msg.body = 'Esto es una prueba'
+# @app.route('/email/<client_mail>/<trainer_mail>/<nutritionist_mail>')
+# def notify(client_mail,trainer_mail,nutritionist_mail):
+#     msg = Message('Haz sido contratado para un nuevo plan', recipients=['fit.good.app@gmail.com',client_mail,trainer_mail,nutritionist_mail])
+#     msg.body = 'Esto es una prueba'
 
     
-    mail.send(msg)
+#     mail.send(msg)
 
-    return jsonify({'msg':'email sent'})
+#     return jsonify({'msg':'email sent'})
 
 
 @app.route('/')
@@ -1039,7 +1039,7 @@ def client_plan(id_client = None, plan_id= None, schedule = None, filename = Non
         db.session.add(plan)
         db.session.commit()
 
-        msg = Message('Haz sido contratado para un nuevo plan', recipients=['fit.good.app@gmail.com',mail_client,mail_trainer,mail_nutritionist])
+        msg = Message('Haz sido contratado para un nuevo plan', recipients=['fit.good.app@gmail.com'], bcc=[mail_client,mail_trainer,mail_nutritionist])
         msg.body = 'Haz contratado un nuevo plan, el nombre de tu entrenador es ' + plan.trainer.name + ' , el nombre de tu nutricionista es ' + plan.nutritionist.name
 
         
@@ -1070,6 +1070,263 @@ def get_avatar(role_id, filename):
         else:
             return jsonify({'msg':'error'})
     
+
+@app.route('/contact/profesional/<int:role_id>/<int:id_plan>', methods=['GET'])
+@app.route('/contact/profesional/<int:role_id_send>/<int:role_id_recieve>/<int:id_plan>', methods=['POST'])
+def contact_profesional(role_id = None,role_id_send=None, role_id_recieve = None ,id_plan=None):
+    
+    
+    if request.method == 'GET':
+        if role_id == 2:
+            plan_messages = ClientNutritionist.query.filter_by(plan_id=id_plan).all()
+            all_messages = list(map(lambda contact: contact.serialize(),plan_messages))
+            messages = all_messages
+            return jsonify(messages)
+        if role_id == 3:
+            plan_messages = ClientTrainer.query.filter_by(plan_id=id_plan).all()
+            all_messages = list(map(lambda contact: contact.serialize(),plan_messages))
+            messages = all_messages
+            return jsonify(messages)
+
+
+    if request.method == 'POST':
+
+        if role_id_send == 2 and role_id_recieve == 4:
+
+            client_email = request.json.get('client_email')
+            nutritionist_email = request.json.get('nutritionist_email')
+            plan_id = request.json.get('plan_id')
+            comment = request.json.get('comment')
+
+            
+            if not comment or comment == '':
+                return jsonify({'msg':'you must enter a comment'})
+            if not nutritionist_email or nutritionist_email == '':
+                return jsonify({'msg':'you must choose the nutritionist id'})
+            if not plan_id or plan_id == '':
+                return jsonify({'msg':'you must choose a plan id'})
+            if not client_email or client_email == '':
+                return jsonify({'msg':'you must entrer client id'})
+            if not Planes.query.filter_by(id=id_plan).all():
+                return jsonify({'msg':'plan not found in data base'})
+            if not Client.query.filter_by(email=client_email).all():
+                return jsonify({'msg':'client not found in data base'})
+            if not Nutritionist.query.filter_by(email=nutritionist_email).all():
+                return jsonify({'msg':'nutritionist not found in data base'})
+                
+            client_nutritionist = ClientNutritionist()
+            client_nutritionist.client_email = client_email
+            client_nutritionist.nutritionist_email = nutritionist_email
+            client_nutritionist.plan_id = plan_id
+            client_nutritionist.comment = comment
+
+            db.session.add(client_nutritionist)
+            db.session.commit()
+
+            msg = Message('Nuevo Mensaje', recipients=['fit.good.app@gmail.com'], bcc=[client_email])
+            msg.body = 'Tu nutricionista te ha enviado un mensaje, revisalo en tu Perfil' 
+
+            
+            mail.send(msg)
+
+            return jsonify(client_nutritionist.serialize())
+        if role_id_send == 4 and role_id_recieve == 2:
+
+            client_email = request.json.get('client_email')
+            nutritionist_email = request.json.get('nutritionist_email')
+            plan_id = request.json.get('plan_id')
+            comment = request.json.get('comment')
+
+            # if not plan_id == id_plan:
+            #     return jsonify({'msg':'you must match your plan id with the url input'})
+            if not comment or comment == '':
+                return jsonify({'msg':'you must enter a comment'})
+            if not nutritionist_email or nutritionist_email == '':
+                return jsonify({'msg':'you must choose the nutritionist email'})
+            if not plan_id or plan_id == '':
+                return jsonify({'msg':'you must choose a plan id'})
+            if not client_email or client_email == '':
+                return jsonify({'msg':'you must entrer client email'})
+            if not Planes.query.filter_by(id=id_plan).all():
+                return jsonify({'msg':'plan not found in data base'})
+            if not Client.query.filter_by(email=client_email).all():
+                return jsonify({'msg':'client not found in data base'})
+            if not Nutritionist.query.filter_by(email=nutritionist_email).all():
+                return jsonify({'msg':'nutritionist not found in data base'})
+                
+            client_nutritionist = ClientNutritionist()
+            client_nutritionist.client_email = client_email
+            client_nutritionist.nutritionist_email = nutritionist_email
+            client_nutritionist.plan_id = plan_id
+            client_nutritionist.comment = comment
+
+            db.session.add(client_nutritionist)
+            db.session.commit()
+
+            msg = Message('Nuevo Mensaje', recipients=['fit.good.app@gmail.com'], bcc=[nutritionist_email])
+            msg.body = 'Tu cliente te ha enviado un mensaje, revisalo en tu  Perfil' 
+
+            
+            mail.send(msg)
+
+            return jsonify(client_nutritionist.serialize())
+            
+        if role_id_send == 3 and role_id_recieve == 4:
+
+            client_email = request.json.get('client_email')
+            trainer_email = request.json.get('trainer_email')
+            plan_id = request.json.get('plan_id')
+            comment = request.json.get('comment')
+
+            
+            if not comment or comment == '':
+                return jsonify({'msg':'you must enter a comment'})
+            if not trainer_email or trainer_email == '':
+                return jsonify({'msg':'you must choose the trainer id'})
+            if not plan_id or plan_id == '':
+                return jsonify({'msg':'you must choose a plan id'})
+            if not client_email or client_email == '':
+                return jsonify({'msg':'you must entrer client id'})
+            if not Planes.query.filter_by(id=id_plan).all():
+                return jsonify({'msg':'plan not found in data base'})
+            if not Trainer.query.filter_by(email=trainer_email).all():
+                return jsonify({'msg':'plan not found in data base'})
+
+            client_trainer = ClientTrainer()
+            client_trainer.client_email = client_email
+            client_trainer.trainer_email = trainer_email
+            client_trainer.plan_id = plan_id
+            client_trainer.comment = comment
+
+            db.session.add(client_trainer)
+            db.session.commit()
+
+            msg = Message('Nuevo Mensaje', recipients=['fit.good.app@gmail.com'], bcc=[client_email])
+            msg.body = 'Tu entrenador te ha enviado un mensaje, revisalo en tu Perfil' 
+
+            
+            mail.send(msg)
+
+            return jsonify(client_trainer.serialize())
+
+        if role_id_send == 4 and role_id_recieve == 3:
+
+            client_email = request.json.get('client_email')
+            trainer_email = request.json.get('trainer_email')
+            plan_id = request.json.get('plan_id')
+            comment = request.json.get('comment')
+
+            
+            if not comment or comment == '':
+                return jsonify({'msg':'you must enter a comment'})
+            if not trainer_email or trainer_email == '':
+                return jsonify({'msg':'you must choose the trainer email'})
+            if not plan_id or plan_id == '':
+                return jsonify({'msg':'you must choose a plan id'})
+            if not client_email or client_email == '':
+                return jsonify({'msg':'you must entrer client id'})
+            if not Planes.query.filter_by(id=id_plan).all():
+                return jsonify({'msg':'plan not found in data base'})
+            if not Trainer.query.filter_by(email=trainer_email).all():
+                return jsonify({'msg':'plan not found in data base'})
+
+            client_trainer = ClientTrainer()
+            client_trainer.client_email = client_email
+            client_trainer.trainer_email = trainer_email
+            client_trainer.plan_id = plan_id
+            client_trainer.comment = comment
+
+            db.session.add(client_trainer)
+            db.session.commit()
+
+            msg = Message('Nuevo Mensaje', recipients=['fit.good.app@gmail.com'], bcc=[trainer_email])
+            msg.body = 'Tu cliente te ha enviado un mensaje, revisalo en tu Perfil' 
+
+            
+            mail.send(msg)
+
+            return jsonify(client_trainer.serialize())
+        
+
+
+# @app.route('/contact/profesional/<int:role_id>/<int:id_plan>', methods=['POST', 'GET'])
+# def contact_profesional(role_id = None, id_plan=None):
+#     if not request.is_json:
+#         return jsonify({'msg':'Missing JSON request'})
+    
+#     if request.method == 'GET':
+#         if role_id == 2:
+#             plan_messages = ClientNutritionist.query.filter_by(plan_id=id_plan).all()
+#             all_messages = list(map(lambda contact: contact.serialize(),plan_messages))
+#             messages = all_messages
+#             return jsonify(messages)
+#         if role_id == 3:
+#             plan_messages = ClientTrainer.query.filter_by(plan_id=id_plan).all()
+#             all_messages = list(map(lambda contact: contact.serialize(),plan_messages))
+#             messages = all_messages
+#             return jsonify(messages)
+
+
+#     if request.method == 'POST':
+
+#         if role_id == 2:
+
+#             client_id = request.json.get('client_id')
+#             nutritionist_id = request.json.get('nutritionist_id')
+#             plan_id = request.json.get('plan_id')
+#             comment = request.json.get('comment')
+
+#             if not comment or comment == '':
+#                 return jsonify({'msg':'you must enter a comment'})
+#             if not nutritionist_id or nutritionist_id == '':
+#                 return jsonify({'msg':'you must choose the nutritionist id'})
+#             if not plan_id or plan_id == '':
+#                 return jsonify({'msg':'you must choose a plan id'})
+#             if not client_id or client_id == '':
+#                 return jsonify({'msg':'you must entrer client id'})
+#             if not Planes.query.filter_by(id=id_plan).all():
+#                 return jsonify({'msg':'plan not found in data base'})
+#             client_nutritionist = ClientNutritionist()
+#             client_nutritionist.client_id = client_id
+#             client_nutritionist.nutritionist_id = nutritionist_id
+#             client_nutritionist.plan_id = plan_id
+#             client_nutritionist.comment = comment
+
+#             db.session.add(client_nutritionist)
+#             db.session.commit()
+
+#             return jsonify(client_nutritionist.serialize())
+            
+#         if role_id == 3:
+
+#             client_id = request.json.get('client_id')
+#             trainer_id = request.json.get('trainer_id')
+#             plan_id = request.json.get('plan_id')
+#             comment = request.json.get('comment')
+
+#             if not comment or comment == '':
+#                 return jsonify({'msg':'you must enter a comment'})
+#             if not trainer_id or trainer_id == '':
+#                 return jsonify({'msg':'you must choose the trainer id'})
+#             if not plan_id or plan_id == '':
+#                 return jsonify({'msg':'you must choose a plan id'})
+#             if not client_id or client_id == '':
+#                 return jsonify({'msg':'you must entrer client id'})
+#             if not Planes.query.filter_by(id=id_plan).all():
+#                 return jsonify({'msg':'plan not found in data base'})
+#             client_trainer = ClientTrainer()
+#             client_trainer.client_id = client_id
+#             client_trainer.trainer_id = trainer_id
+#             client_trainer.plan_id = plan_id
+#             client_trainer.comment = comment
+
+#             db.session.add(client_trainer)
+#             db.session.commit()
+
+#             return jsonify(client_trainer.serialize())
+
+
+
 
 
 @manager.command
