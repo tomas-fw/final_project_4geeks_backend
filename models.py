@@ -210,6 +210,7 @@ class Planes(db.Model):
             "client_id": self.client_detail.id,
             'client_email':self.client_detail.email,
             'client_name':self.client_detail.name,
+            'client_lastname':self.client_detail.lastname,
             "nutritionist_id": self.nutritionist.id,
             "nutritionist_email": self.nutritionist_email,
             'nutritionist_name':self.nutritionist_detail.name,
