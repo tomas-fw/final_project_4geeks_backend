@@ -1,5 +1,5 @@
 import os,getpass
-from flask import Flask, render_template, jsonify, request, send_from_directory
+from flask import Flask, render_template, jsonify, request, send_from_directory, abort
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from flask_cors import CORS
@@ -17,7 +17,7 @@ from werkzeug.utils import secure_filename
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 ALLOWED_EXTENSIONS_IMAGES = {'png','jpg','jpeg', 'gif', 'svg'}
-ALLOWED_EXTENSIONS_FILES = {'png','jpg','jpeg', 'gif', 'svg', 'pdf'}
+ALLOWED_EXTENSIONS_FILES = {'pdf'}
 
 app = Flask(__name__)
 
@@ -34,10 +34,12 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_DEBUG'] = True
 app.config['MAIL_USERNAME'] = 'fit.good.app@gmail.com'
-app.config['MAIL_PASSWORD'] = 'dajato2020'
+app.config['MAIL_PASSWORD'] = ''
 app.config['MAIL_DEFAULT_SENDER'] = ('Javiera de Fit Good App','fit.good.app@gmail.com')
 app.config['MAIL_MAX_EMAILS'] = None
 app.config['MAI_ASCII_ATTACHMENTS'] = False
+
+
 
 jwt = JWTManager(app)
 
@@ -50,15 +52,20 @@ manager = Manager(app)
 manager.add_command('db', MigrateCommand)
 
 
-# @app.route('/email/<client_mail>/<trainer_mail>/<nutritionist_mail>')
-# def notify(client_mail,trainer_mail,nutritionist_mail):
-#     msg = Message('Haz sido contratado para un nuevo plan', recipients=['fit.good.app@gmail.com',client_mail,trainer_mail,nutritionist_mail])
-#     msg.body = 'Esto es una prueba'
+####        DOWNLOAD DOCUMENT      ######
+
+@app.route('/download/<document>')
+def download_document(document):
 
     
-#     mail.send(msg)
+    # return render_template('index.html')
+    try:
+        return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'], 'downloads'), filename= document, as_attachment=True)
 
-#     return jsonify({'msg':'email sent'})
+    except FileNotFoundError:
+        abort(404)
+
+
 
 
 @app.route('/')
@@ -409,7 +416,7 @@ def admin_profesionals(role_id=None, id = None, document = None, filename= None)
 ### ADMIN ROUTES   #####   GET ALL CLIENTS IN DATABASE OR SPECIFIC CLIENT BY ID
 
 @app.route('/admin/client', methods=['GET'])
-@app.route('/admin/client/<int:client_id>', methods=['GET','PUT','DELETE'])
+@app.route('/admin/client/<int:client_id>', methods=['GET','PUT'])
 def admin_clients(client_id = None):
     if request.method == 'GET':
         if client_id is None:       ####    THIS ONE SHOWS EVERY CLIENT
@@ -557,7 +564,7 @@ def login(role_id):
             data={
                 'access_token': access_token,
                 'user':{
-                    'nutritionist_id': trainer.id,
+                    'trainer_id': trainer.id,
                     'email': trainer.email,
                     'name': trainer.name,
                     'lastname': trainer.lastname,
@@ -802,6 +809,72 @@ def profesional_register(role):
         return jsonify(data), 200
 
 
+
+
+
+####         PROFESSIONAL EDIT PROFILE          ####
+@app.route('/edit/profesional/<int:role_id>/<int:id>/', methods=['PUT'])
+def edit_profesional_profile(role_id,id):
+    if request.method == 'PUT':
+        if role_id != None and role_id != 2 and role_id != 3:       ### THIS VERIFIES THAT THE ROLE EXISTS WITHIN PROFESIONALS
+            return jsonify({"msg":"role input not valid"}), 404
+        if role_id == 2 and id:
+            single_nutritionist= Nutritionist.query.get(id)
+            if not single_nutritionist:
+                return jsonify({'msg':'nutritionist does not exist in database'}), 404
+        
+            age = request.form.get('age')
+            specialties = request.form.get('specialties')
+            description = request.form.get('description')
+           
+
+            if not age or age == '':
+                return jsonify({"msg":"Missing age field"}),404            
+            if not specialties or specialties == '':
+                return jsonify({"msg":"Missing specialties field"}),404
+            if not description or description == '':
+                return jsonify({"msg":"Missing description field"}),404
+            
+            
+        
+            nutritionist = Nutritionist.query.get(id)
+            nutritionist.age = age
+            nutritionist.specialties = specialties
+            nutritionist.description = description
+
+            db.session.commit()
+        
+            return jsonify({'msg':'update complete'}), 200
+        
+        if role_id == 3 and id:
+            single_trainer= Trainer.query.get(id)
+            if not single_trainer:
+                return jsonify({'msg':'trainer does not exist in database'}), 404
+        
+            age = request.form.get('age')
+            specialties = request.form.get('specialties')
+            description = request.form.get('description')
+
+            if not age or age == '':
+                return jsonify({"msg":"Missing age field"}),404            
+            if not specialties or specialties == '':
+                return jsonify({"msg":"Missing specialties field"}),404
+            if not description or description == '':
+                return jsonify({"msg":"Missing description field"}),404
+            
+            
+        
+            trainer = Trainer.query.get(id)
+            trainer.age = age
+            trainer.specialties = specialties
+            trainer.description = description
+
+            db.session.commit()
+        
+            return jsonify({'msg':'update complete'}), 200
+
+
+
 ###    PROFESIONAL CREATE A WORKOUT AND DIET PLAN       #####
 
 @app.route('/profesional/<int:role_id>/<int:plan_id>', methods=['POST'])
@@ -811,14 +884,19 @@ def profesional_plan(role_id, plan_id):
     if role_id == 2:
 
         diet = request.files['diet']
+        oldfilename = request.form.get('oldfilename')       
+
         if not diet:
             return jsonify({'msg':'missing diet plan'})
-        all_diets = Planes.query.filter_by(diet_plan=diet.filename).first()
-        if all_diets:
-            return({'msg':'filename already exists, try changing it to a more unique name '})
+        # all_diets = Planes.query.filter_by(diet_plan=diet.filename).first()
+        # if all_diets:
+        #     return({'msg':'filename already exists, try changing it to a more unique name '})
         if diet and diet.filename!= '' and allowed_files(diet.filename, ALLOWED_EXTENSIONS_FILES):
             filename = secure_filename(diet.filename)
             diet.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'diets'), filename))
+            if oldfilename:
+                if os.path.exists(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'diets'), oldfilename)):
+                    os.remove(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'diets'), oldfilename))
         else:
             return jsonify({"msg":"file is not allowed"}), 400
         
@@ -831,6 +909,8 @@ def profesional_plan(role_id, plan_id):
     if role_id == 3:
 
         workout = request.files['workout']
+        oldfilename = request.form.get('oldfilename')       
+
         if not workout:
             return jsonify({'msg':'missing workout plan'})
         all_workouts = Planes.query.filter_by(workout_plan=workout.filename).first()
@@ -839,6 +919,9 @@ def profesional_plan(role_id, plan_id):
         if workout and workout.filename!= '' and allowed_files(workout.filename, ALLOWED_EXTENSIONS_FILES):
             filename = secure_filename(workout.filename)
             workout.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'workouts'), filename))
+            if oldfilename:
+                if os.path.exists(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'workouts'), oldfilename)):
+                    os.remove(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'workouts'), oldfilename))
         else:
             return jsonify({"msg":"file is not allowed"}), 400
         
@@ -912,6 +995,78 @@ def client_register():
 
     return jsonify(data), 200
     
+
+@app.route('/avatar/edit/<int:role_id>/<int:id>', methods=['PUT'])
+def edit_client(role_id,id):
+    if role_id == 2:
+        specific_nutritionist= Nutritionist.query.get(id)
+        if not specific_nutritionist:
+            return jsonify({'msg':'Nutritionist does not exist in database'}), 404
+            
+        avatar = request.files['avatar']
+        oldfilename = request.form.get('oldfilename')       
+                
+        if avatar and avatar.filename != '' and allowed_files(avatar.filename, ALLOWED_EXTENSIONS_IMAGES):
+            filename = secure_filename(avatar.filename)
+            avatar.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar/nutritionist'), filename))
+            if oldfilename != 'default_profile.png':
+                if os.path.exists(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar/nutritionist'), oldfilename)):
+                    os.remove(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar/nutritionist'), oldfilename))
+            
+        nutritionist = Nutritionist.query.get(id)
+        nutritionist.avatar = filename
+                
+
+        db.session.commit()
+            
+        return jsonify({'msg':'nutritionist pictures update complete'}), 200
+
+    if role_id == 3:
+        specific_trainer= Trainer.query.get(id)
+        if not specific_trainer:
+            return jsonify({'msg':'Client does not exist in database'}), 404
+            
+        avatar = request.files['avatar']
+        oldfilename = request.form.get('oldfilename')       
+                
+        if avatar and avatar.filename != '' and allowed_files(avatar.filename, ALLOWED_EXTENSIONS_IMAGES):
+            filename = secure_filename(avatar.filename)
+            avatar.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar/trainer'), filename))
+            if oldfilename != 'default_profile.png':
+                if os.path.exists(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar/trainer'), oldfilename)):
+                    os.remove(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar/trainer'), oldfilename))
+            
+        client = Trainer.query.get(id)
+        client.avatar = filename
+                
+
+        db.session.commit()
+            
+        return jsonify({'msg':' trainer profile picupdate complete'}), 200
+
+    if role_id == 4:
+        specific_client= Client.query.get(id)
+        if not specific_client:
+            return jsonify({'msg':'Client does not exist in database'}), 404
+            
+        avatar = request.files['avatar']
+        oldfilename = request.form.get('oldfilename')       
+                
+        if avatar and avatar.filename != '' and allowed_files(avatar.filename, ALLOWED_EXTENSIONS_IMAGES):
+            filename = secure_filename(avatar.filename)
+            avatar.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar/clients'), filename))
+            if oldfilename != 'default_profile.png':
+                if os.path.exists(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar/clients'), oldfilename)):
+                    os.remove(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar/clients'), oldfilename))
+            
+        client = Client.query.get(id)
+        client.avatar = filename
+                
+
+        db.session.commit()
+            
+        return jsonify({'msg':'update complete'}), 200
+
 
 ###    CLIENT ROUTES   #### -- CLIENT CREATE PLAN AND CHECK HIS PLANNES OR SPECIFIC PLAN PER CLIENT
 @app.route('/client/plan/<int:id_client>', methods=['GET'])
