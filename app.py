@@ -1,11 +1,11 @@
 import os,getpass
-from flask import Flask, render_template, jsonify, request, send_from_directory, abort
+from flask import Flask, render_template, jsonify, request, send_from_directory, abort, url_for
+from models import db, Role, Admin, Nutritionist, Trainer, Client, Planes, ClientTrainer, ClientNutritionist
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from flask_mail import Mail, Message
-from models import db, Role, Admin, Nutritionist, Trainer, Client, Planes, ClientTrainer, ClientNutritionist
 from flask_jwt_extended import(
     JWTManager, get_jwt_identity, create_access_token,
     jwt_required
@@ -27,6 +27,7 @@ app.config['ENV'] = 'development'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'super-secret'
+app.config['SECRET_KEY'] = '/xc3/x1a/x1a/x7fO//+b/xa2H/xd8</x0e&/xfb/xc5/x19/xfa [/xca/xdc/x8b/xa7'
 app.config['UPLOAD_FOLDER'] = os.path.join(BASE_DIR, 'static')
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
@@ -34,7 +35,7 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_DEBUG'] = True
 app.config['MAIL_USERNAME'] = 'fit.good.app@gmail.com'
-app.config['MAIL_PASSWORD'] = ''
+app.config['MAIL_PASSWORD'] = 'dajato2020'
 app.config['MAIL_DEFAULT_SENDER'] = ('Javiera de Fit Good App','fit.good.app@gmail.com')
 app.config['MAIL_MAX_EMAILS'] = None
 app.config['MAI_ASCII_ATTACHMENTS'] = False
@@ -1391,6 +1392,53 @@ def contact_profesional(role_id = None,role_id_send=None, role_id_recieve = None
 
             return jsonify(client_trainer.serialize())
         
+
+def send_reset_email(user):
+    token = user.get_reset_token(app.config['SECRET_KEY'])
+    confirm_url = 'http://localhost:3000/confirmation/' + token
+    msg = Message('Cambiar Contraseña',
+                    sender='fit.good.app@gmail.com',
+                    recipients=[user.email])
+    msg.body = f''' Para cambiar tu contraseña, haz click en el siguiente link:
+    
+    {render_template('email_confirmation.html', token = token, confirm_url=confirm_url,_external=True)}
+    
+    Si no haz solicitado el cambio de tu contraseña, simplemente ignora este correo
+     '''
+
+    mail.send(msg)
+
+@app.route('/reset_password', methods=['GET','POST'])
+def reset_request():
+
+    email = request.json.get('email')
+    if not email or email == '':
+        return jsonify({'msg':'you must enter an email'}), 404
+
+    client = Client.query.filter_by(email = email).first()
+    if not client:
+        return jsonify({'msg':"client doesn't exist"}), 400
+    
+    send_reset_email(client)
+
+    return jsonify({'msg':'Te hemos enviado un correo'})
+
+@app.route('/reset_password/<token>', methods=['GET','POST'])
+def reset_token(token):
+
+    password = request.json.get('password')
+
+    client = Client.verify_reset_token(token, app.config['SECRET_KEY'])
+    if not client:
+        return jsonify({'msg':'Token es invalido o ha expirado'}), 400
+    
+    hashed_password = bcrypt.generate_password_hash(password)
+    client.password = hashed_password
+
+    db.session.commit()
+
+    return jsonify({'msg':'Password actualizado'})
+
 
 
 # @app.route('/contact/profesional/<int:role_id>/<int:id_plan>', methods=['POST', 'GET'])

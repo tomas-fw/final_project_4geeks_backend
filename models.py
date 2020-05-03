@@ -1,6 +1,8 @@
 from datetime import datetime
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
+# from app import app
 
 
 class Role(db.Model):
@@ -69,6 +71,20 @@ class Client(db.Model):
             "active": self.active
 
         }
+
+    def get_reset_token(self,secret_key ,expires_sec=1800):
+        s = Serializer(secret_key, expires_sec)
+        return s.dumps({'user_id':self.id}).decode('utf-8')
+
+    @staticmethod
+    def verify_reset_token(token, secret_key):
+        s = Serializer(secret_key)
+        try:
+            user_id = s.loads(token)['user_id']
+        except:
+            return None
+        return Client.query.get(user_id)
+
 ######static\images\avatar\default_profile.png
 # PROFESIONALES (Personal trainer y nutricionista)
 class Nutritionist(db.Model):
