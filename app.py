@@ -815,6 +815,7 @@ def profesional_register(role):
 
 ####         PROFESSIONAL EDIT PROFILE          ####
 @app.route('/edit/profesional/<int:role_id>/<int:id>/', methods=['PUT'])
+@jwt_required
 def edit_profesional_profile(role_id,id):
     if request.method == 'PUT':
         if role_id != None and role_id != 2 and role_id != 3:       ### THIS VERIFIES THAT THE ROLE EXISTS WITHIN PROFESIONALS
@@ -879,6 +880,7 @@ def edit_profesional_profile(role_id,id):
 ###    PROFESIONAL CREATE A WORKOUT AND DIET PLAN       #####
 
 @app.route('/profesional/<int:role_id>/<int:plan_id>', methods=['POST'])
+@jwt_required
 def profesional_plan(role_id, plan_id):
     if not role_id:
         return jsonify({'msg':'missing role input'})
@@ -998,6 +1000,7 @@ def client_register():
     
 
 @app.route('/avatar/edit/<int:role_id>/<int:id>', methods=['PUT'])
+@jwt_required
 def edit_client(role_id,id):
     if role_id == 2:
         specific_nutritionist= Nutritionist.query.get(id)
@@ -1074,6 +1077,7 @@ def edit_client(role_id,id):
 @app.route('/client/plan/<int:id_client>/<int:plan_id>', methods=['GET'])
 @app.route('/client/plan/<int:id_client>/<int:plan_id>/<schedule>/<filename>', methods=['GET'])
 @app.route('/client/plan/<int:id_client>/<mail_client>/<mail_trainer>/<mail_nutritionist>', methods=['POST'])
+@jwt_required
 def client_plan(id_client = None, plan_id= None, schedule = None, filename = None, mail_client = None ,mail_trainer= None ,mail_nutritionist= None):   
     if request.method == 'GET':
         client = Client.query.get(id_client)
@@ -1184,8 +1188,8 @@ def client_plan(id_client = None, plan_id= None, schedule = None, filename = Non
         db.session.add(plan)
         db.session.commit()
 
-        msg = Message('Haz sido contratado para un nuevo plan', recipients=['fit.good.app@gmail.com'], bcc=[mail_client,mail_trainer,mail_nutritionist])
-        msg.body = 'Haz contratado un nuevo plan, el nombre de tu entrenador es ' + plan.trainer.name + ' , el nombre de tu nutricionista es ' + plan.nutritionist.name
+        msg = Message('Fit good Nuevo Plan', recipients=['fit.good.app@gmail.com'], bcc=[mail_client,mail_trainer,mail_nutritionist])
+        msg.body = 'Un nuevo plan ha sido contratado, el nombre del entrenador es: ' + plan.trainer.name + ' , el nombre del nutricionista es: ' + plan.nutritionist.name
 
         
         mail.send(msg)
@@ -1218,6 +1222,7 @@ def get_avatar(role_id, filename):
 
 @app.route('/contact/profesional/<int:role_id>/<int:id_plan>', methods=['GET'])
 @app.route('/contact/profesional/<int:role_id_send>/<int:role_id_recieve>/<int:id_plan>', methods=['POST'])
+@jwt_required
 def contact_profesional(role_id = None,role_id_send=None, role_id_recieve = None ,id_plan=None):
     
     
@@ -1393,9 +1398,37 @@ def contact_profesional(role_id = None,role_id_send=None, role_id_recieve = None
             return jsonify(client_trainer.serialize())
         
 
-def send_reset_email(user):
+def send_reset_email_client(user):
     token = user.get_reset_token(app.config['SECRET_KEY'])
-    confirm_url = 'http://localhost:3000/confirmation/' + token
+    confirm_url = 'http://localhost:3000/confirmation/'+'4'+'/' + token
+    msg = Message('Cambiar Contraseña',
+                    sender='fit.good.app@gmail.com',
+                    recipients=[user.email])
+    msg.body = f''' Para cambiar tu contraseña, haz click en el siguiente link:
+    
+    {render_template('email_confirmation.html', token = token, confirm_url=confirm_url,_external=True)}
+    
+    Si no haz solicitado el cambio de tu contraseña, simplemente ignora este correo
+     '''
+
+    mail.send(msg)
+def send_reset_email_trainer(user):
+    token = user.get_reset_token(app.config['SECRET_KEY'])
+    confirm_url = 'http://localhost:3000/confirmation/'+'3'+'/' + token
+    msg = Message('Cambiar Contraseña',
+                    sender='fit.good.app@gmail.com',
+                    recipients=[user.email])
+    msg.body = f''' Para cambiar tu contraseña, haz click en el siguiente link:
+    
+    {render_template('email_confirmation.html', token = token, confirm_url=confirm_url,_external=True)}
+    
+    Si no haz solicitado el cambio de tu contraseña, simplemente ignora este correo
+     '''
+
+    mail.send(msg)
+def send_reset_email_nutritionist(user):
+    token = user.get_reset_token(app.config['SECRET_KEY'])
+    confirm_url = 'http://localhost:3000/confirmation/' +'2'+'/' +token
     msg = Message('Cambiar Contraseña',
                     sender='fit.good.app@gmail.com',
                     recipients=[user.email])
@@ -1408,36 +1441,93 @@ def send_reset_email(user):
 
     mail.send(msg)
 
-@app.route('/reset_password', methods=['GET','POST'])
-def reset_request():
+@app.route('/reset_password/<int:role_id>', methods=['GET','POST'])
+def reset_request(role_id):
 
-    email = request.json.get('email')
-    if not email or email == '':
-        return jsonify({'msg':'you must enter an email'}), 404
+    if role_id == 2:            
 
-    client = Client.query.filter_by(email = email).first()
-    if not client:
-        return jsonify({'msg':"client doesn't exist"}), 400
-    
-    send_reset_email(client)
+        email = request.json.get('email')
+        if not email or email == '':
+            return jsonify({'msg':'you must enter an email'}), 404
 
-    return jsonify({'msg':'Te hemos enviado un correo'})
+        nutritionist = Nutritionist.query.filter_by(email = email).first()
+        if not nutritionist:
+            return jsonify({'msg':"Nutritionist doesn't exist"}), 400
+        
+        send_reset_email_nutritionist(nutritionist)
 
-@app.route('/reset_password/<token>', methods=['GET','POST'])
-def reset_token(token):
+        return jsonify({'msg':'Te hemos enviado un correo'})
+    if role_id == 3:            
 
-    password = request.json.get('password')
+        email = request.json.get('email')
+        if not email or email == '':
+            return jsonify({'msg':'you must enter an email'}), 404
 
-    client = Client.verify_reset_token(token, app.config['SECRET_KEY'])
-    if not client:
-        return jsonify({'msg':'Token es invalido o ha expirado'}), 400
-    
-    hashed_password = bcrypt.generate_password_hash(password)
-    client.password = hashed_password
+        trainer = Trainer.query.filter_by(email = email).first()
+        if not trainer:
+            return jsonify({'msg':"Trainer doesn't exist"}), 400
+        
+        send_reset_email_trainer(trainer)
 
-    db.session.commit()
+        return jsonify({'msg':'Te hemos enviado un correo'})
+    if role_id == 4:            
 
-    return jsonify({'msg':'Password actualizado'})
+        email = request.json.get('email')
+        if not email or email == '':
+            return jsonify({'msg':'you must enter an email'}), 404
+
+        client = Client.query.filter_by(email = email).first()
+        if not client:
+            return jsonify({'msg':"client doesn't exist"}), 400
+        
+        send_reset_email_client(client)
+
+        return jsonify({'msg':'Te hemos enviado un correo'})
+
+@app.route('/reset_password/<int:role_id>/<token>', methods=['GET','POST'])
+def reset_token(role_id,token):
+
+    if role_id == 2:
+        password = request.json.get('password')
+
+        nutritionist = Nutritionist.verify_reset_token(token, app.config['SECRET_KEY'])
+        if not nutritionist:
+            return jsonify({'msg':'Token es invalido o ha expirado'}), 400
+        
+        hashed_password = bcrypt.generate_password_hash(password)
+        nutritionist.password = hashed_password
+
+        db.session.commit()
+
+        return jsonify({'msg':'Password actualizado'}), 200
+
+    if role_id == 3:
+        password = request.json.get('password')
+
+        trainer = Trainer.verify_reset_token(token, app.config['SECRET_KEY'])
+        if not trainer:
+            return jsonify({'msg':'Token es invalido o ha expirado'}), 400
+        
+        hashed_password = bcrypt.generate_password_hash(password)
+        trainer.password = hashed_password
+
+        db.session.commit()
+
+        return jsonify({'msg':'Password actualizado'}), 200
+
+    if role_id == 4:
+        password = request.json.get('password')
+
+        client = Client.verify_reset_token(token, app.config['SECRET_KEY'])
+        if not client:
+            return jsonify({'msg':'Token es invalido o ha expirado'}), 400
+        
+        hashed_password = bcrypt.generate_password_hash(password)
+        client.password = hashed_password
+
+        db.session.commit()
+
+        return jsonify({'msg':'Password actualizado'}), 200
 
 
 

@@ -135,6 +135,19 @@ class Nutritionist(db.Model):
 
         }
 
+    def get_reset_token(self,secret_key ,expires_sec=1800):
+        s = Serializer(secret_key, expires_sec)
+        return s.dumps({'user_id':self.id}).decode('utf-8')
+
+    @staticmethod
+    def verify_reset_token(token, secret_key):
+        s = Serializer(secret_key)
+        try:
+            user_id = s.loads(token)['user_id']
+        except:
+            return None
+        return Nutritionist.query.get(user_id)
+
 class Trainer(db.Model):
     __tablename__ = 'trainer'
     id = db.Column(db.Integer, primary_key=True)
@@ -180,6 +193,19 @@ class Trainer(db.Model):
             "planes_id": self.planes_id
 
         }
+    
+    def get_reset_token(self,secret_key ,expires_sec=1800):
+        s = Serializer(secret_key, expires_sec)
+        return s.dumps({'user_id':self.id}).decode('utf-8')
+
+    @staticmethod
+    def verify_reset_token(token, secret_key):
+        s = Serializer(secret_key)
+        try:
+            user_id = s.loads(token)['user_id']
+        except:
+            return None
+        return Trainer.query.get(user_id)
 ####### CONVERSAR SI ESTO VA O NO
 #  Plan de cada cliente q tiene nut y pt en cada plan para q quede como historial 
 class Planes(db.Model):
