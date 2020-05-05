@@ -301,7 +301,7 @@ class ClientTrainer(db.Model):
     plan_id = db.Column(db.Integer, db.ForeignKey('planes.id'), nullable=False)
     comment = db.Column(db.String(250), nullable=True)
     date_created = db.Column(db.DateTime, nullable = False, default = datetime.utcnow)
-    
+    sender =  db.Column(db.String(250), nullable=True)
 
     def serialize(self):
         return {
@@ -314,7 +314,8 @@ class ClientTrainer(db.Model):
             'trainer_name':self.trainer_author.name,
             'trainer_lastname':self.trainer_author.lastname,
             'comment':self.comment,
-            'date_created':self.date_created
+            'date_created':self.date_created,
+            "sender": self.sender
         }
 class ClientNutritionist(db.Model):
     __tablename__='client_nutritionist'
@@ -324,6 +325,8 @@ class ClientNutritionist(db.Model):
     plan_id = db.Column(db.Integer, db.ForeignKey('planes.id'), nullable=False)
     comment = db.Column(db.String(250), nullable=True)
     date_created = db.Column(db.DateTime, nullable = False, default = datetime.utcnow)
+    sender =  db.Column(db.String(250), nullable=True)
+
 
 
     def serialize(self):
@@ -337,7 +340,9 @@ class ClientNutritionist(db.Model):
             'nutritionist_name':self.nutritionist_author.name,
             'nutritionist_lastname':self.nutritionist_author.lastname,
             'comment':self.comment,
-            'date_created':self.date_created
+            'date_created':self.date_created,
+            "sender": self.sender
+
         }
 
     

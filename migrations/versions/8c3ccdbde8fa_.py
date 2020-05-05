@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: b5578f007950
+Revision ID: 8c3ccdbde8fa
 Revises: 
-Create Date: 2020-05-05 10:56:00.115789
+Create Date: 2020-05-05 12:46:59.406336
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'b5578f007950'
+revision = '8c3ccdbde8fa'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -138,6 +138,7 @@ def upgrade():
     sa.Column('plan_id', sa.Integer(), nullable=False),
     sa.Column('comment', sa.String(length=250), nullable=True),
     sa.Column('date_created', sa.DateTime(), nullable=False),
+    sa.Column('sender', sa.String(length=250), nullable=True),
     sa.ForeignKeyConstraint(['client_email'], ['client.email'], ),
     sa.ForeignKeyConstraint(['nutritionist_email'], ['nutritionist.email'], ),
     sa.ForeignKeyConstraint(['plan_id'], ['planes.id'], ),
@@ -150,6 +151,7 @@ def upgrade():
     sa.Column('plan_id', sa.Integer(), nullable=False),
     sa.Column('comment', sa.String(length=250), nullable=True),
     sa.Column('date_created', sa.DateTime(), nullable=False),
+    sa.Column('sender', sa.String(length=250), nullable=True),
     sa.ForeignKeyConstraint(['client_email'], ['client.email'], ),
     sa.ForeignKeyConstraint(['plan_id'], ['planes.id'], ),
     sa.ForeignKeyConstraint(['trainer_email'], ['trainer.email'], ),

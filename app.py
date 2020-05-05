@@ -1235,6 +1235,7 @@ def contact_profesional(role_id = None,role_id_send=None, role_id_recieve = None
             nutritionist_email = request.json.get('nutritionist_email')
             plan_id = request.json.get('plan_id')
             comment = request.json.get('comment')
+            sender = request.json.get('sender')
 
             
             if not comment or comment == '':
@@ -1245,6 +1246,8 @@ def contact_profesional(role_id = None,role_id_send=None, role_id_recieve = None
                 return jsonify({'msg':'you must choose a plan id'})
             if not client_email or client_email == '':
                 return jsonify({'msg':'you must entrer client id'})
+            if not sender or sender == '':
+                return jsonify({'msg':'you must entrer a sender'})
             if not Planes.query.filter_by(id=id_plan).all():
                 return jsonify({'msg':'plan not found in data base'})
             if not Client.query.filter_by(email=client_email).all():
@@ -1257,6 +1260,7 @@ def contact_profesional(role_id = None,role_id_send=None, role_id_recieve = None
             client_nutritionist.nutritionist_email = nutritionist_email
             client_nutritionist.plan_id = plan_id
             client_nutritionist.comment = comment
+            client_nutritionist.sender = sender
 
             db.session.add(client_nutritionist)
             db.session.commit()
@@ -1274,6 +1278,8 @@ def contact_profesional(role_id = None,role_id_send=None, role_id_recieve = None
             nutritionist_email = request.json.get('nutritionist_email')
             plan_id = request.json.get('plan_id')
             comment = request.json.get('comment')
+            sender = request.json.get('sender')
+
 
             # if not plan_id == id_plan:
             #     return jsonify({'msg':'you must match your plan id with the url input'})
@@ -1285,6 +1291,8 @@ def contact_profesional(role_id = None,role_id_send=None, role_id_recieve = None
                 return jsonify({'msg':'you must choose a plan id'})
             if not client_email or client_email == '':
                 return jsonify({'msg':'you must entrer client email'})
+            if not sender or sender == '':
+                return jsonify({'msg':'you must entrer a sender'})
             if not Planes.query.filter_by(id=id_plan).all():
                 return jsonify({'msg':'plan not found in data base'})
             if not Client.query.filter_by(email=client_email).all():
@@ -1297,6 +1305,7 @@ def contact_profesional(role_id = None,role_id_send=None, role_id_recieve = None
             client_nutritionist.nutritionist_email = nutritionist_email
             client_nutritionist.plan_id = plan_id
             client_nutritionist.comment = comment
+            client_nutritionist.sender = sender
 
             db.session.add(client_nutritionist)
             db.session.commit()
@@ -1315,6 +1324,8 @@ def contact_profesional(role_id = None,role_id_send=None, role_id_recieve = None
             trainer_email = request.json.get('trainer_email')
             plan_id = request.json.get('plan_id')
             comment = request.json.get('comment')
+            sender = request.json.get('sender')
+
 
             
             if not comment or comment == '':
@@ -1325,6 +1336,8 @@ def contact_profesional(role_id = None,role_id_send=None, role_id_recieve = None
                 return jsonify({'msg':'you must choose a plan id'})
             if not client_email or client_email == '':
                 return jsonify({'msg':'you must entrer client id'})
+            if not sender or sender == '':
+                return jsonify({'msg':'you must entrer a sender'})
             if not Planes.query.filter_by(id=id_plan).all():
                 return jsonify({'msg':'plan not found in data base'})
             if not Trainer.query.filter_by(email=trainer_email).all():
@@ -1335,6 +1348,7 @@ def contact_profesional(role_id = None,role_id_send=None, role_id_recieve = None
             client_trainer.trainer_email = trainer_email
             client_trainer.plan_id = plan_id
             client_trainer.comment = comment
+            client_trainer.sender = sender
 
             db.session.add(client_trainer)
             db.session.commit()
@@ -1353,6 +1367,8 @@ def contact_profesional(role_id = None,role_id_send=None, role_id_recieve = None
             trainer_email = request.json.get('trainer_email')
             plan_id = request.json.get('plan_id')
             comment = request.json.get('comment')
+            sender = request.json.get('sender')
+
 
             
             if not comment or comment == '':
@@ -1363,6 +1379,8 @@ def contact_profesional(role_id = None,role_id_send=None, role_id_recieve = None
                 return jsonify({'msg':'you must choose a plan id'})
             if not client_email or client_email == '':
                 return jsonify({'msg':'you must entrer client id'})
+            if not sender or sender == '':
+                return jsonify({'msg':'you must entrer a sender'})
             if not Planes.query.filter_by(id=id_plan).all():
                 return jsonify({'msg':'plan not found in data base'})
             if not Trainer.query.filter_by(email=trainer_email).all():
@@ -1373,6 +1391,7 @@ def contact_profesional(role_id = None,role_id_send=None, role_id_recieve = None
             client_trainer.trainer_email = trainer_email
             client_trainer.plan_id = plan_id
             client_trainer.comment = comment
+            client_trainer.sender = sender
 
             db.session.add(client_trainer)
             db.session.commit()
