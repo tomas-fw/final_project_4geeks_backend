@@ -660,50 +660,50 @@ def profesional_register(role):
         avatar = request.files['avatar']
         all_avatars = Nutritionist.query.filter_by(avatar=avatar.filename).first()
         if all_avatars:
-            return jsonify({'msg':'please change name of profile card to you RUT number'}), 400
+            return jsonify({'msg':'Por favor, cambia el nombre de tu foto de perfil a tu correo o rut'}), 400
         
         if avatar and avatar.filename!= '' and allowed_files(avatar.filename, ALLOWED_EXTENSIONS_IMAGES):
             filename = secure_filename(avatar.filename)
             avatar.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar/nutritionist'), filename)), 400
         else:
-            return jsonify({"msg":"file is not allowed"}), 400
+            return jsonify({"msg":"Tipo de archivo, no permitido"}), 400
             
         background = request.files['background']
         if not background:
-            return ({'msg':'please attached your background'})
+            return ({'msg':'Por favor adjunta tus antecedentes'})
         all_backgrounds = Nutritionist.query.filter_by(background=background.filename).first()
         if all_backgrounds:
-            return jsonify({'msg':'filename already exists, please change the name of your file to the name of your email'}), 400
+            return jsonify({'msg':'Por favor, cambia el nombre de tu foto de perfil a tu correo o rut'}), 400
         if background and background.filename!= '' and allowed_files(background.filename, ALLOWED_EXTENSIONS_FILES):
             background_filename = secure_filename(background.filename)
             background.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/background/nutritionist'), background_filename))
         else:
-            return jsonify({"msg":"file is not allowed"}), 400
+            return jsonify({"msg":"Tipo de archivo no permitido"}), 400
 
         title = request.files['title']
         if not title:
-            return ({'msg':'please attached your profesional title'}).first()
+            return ({'msg':'Por favor ingresa tu titulo profesional'}).first()
         all_titles = Nutritionist.query.filter_by(profesional_title=title.filename).first()
         if all_titles:
-            return jsonify({'msg':'filename already exists, please change the name of your file to the name of your email'}), 400
+            return jsonify({'msg':'Por favor, cambia el nombre de tu foto de perfil a tu correo o rut'}), 400
         if title and title.filename!= '' and allowed_files(title.filename, ALLOWED_EXTENSIONS_FILES):
             title_filename = secure_filename(title.filename)
             title.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/profesional_title/nutritionist'), title_filename))
         else:
-            return jsonify({"msg":"file is not allowed"}), 400
+            return jsonify({"msg":"Tipo de archivo no permitido"}), 400
 
         title_validation = request.files['title_validation']
         if not title_validation:
-            return jsonify({'msg':'please attached you title validation'})
+            return jsonify({'msg':'Por favor adjunto tu certificado de la super intendencia'})
         all_title_validation = Nutritionist.query.filter_by(nutritionist_validation_title = title_validation.filename ).first()
         if all_title_validation:
-            return jsonify({'msg':'profesional title validation filename already exists, please change the name of your file to the name of your email'})
+            return jsonify({'msg':'Por favor, cambia el nombre de tu foto de perfil a tu correo o rut'})
 
         if title_validation and title_validation.filename!= '' and allowed_files(title_validation.filename, ALLOWED_EXTENSIONS_FILES):
             title_validation_filename = secure_filename(title_validation.filename)
             title_validation.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/title_validation'), title_validation_filename))
         else:
-            return jsonify({"msg":"file is not allowed"}), 400
+            return jsonify({"msg":"Tipo de archivo no permitido"}), 400
 
         if not background or background == '':
             return jsonify({'msg':'background missing'})
@@ -815,7 +815,6 @@ def profesional_register(role):
 
 ####         PROFESSIONAL EDIT PROFILE          ####
 @app.route('/edit/profesional/<int:role_id>/<int:id>/', methods=['PUT'])
-@jwt_required
 def edit_profesional_profile(role_id,id):
     if request.method == 'PUT':
         if role_id != None and role_id != 2 and role_id != 3:       ### THIS VERIFIES THAT THE ROLE EXISTS WITHIN PROFESIONALS
@@ -880,7 +879,6 @@ def edit_profesional_profile(role_id,id):
 ###    PROFESIONAL CREATE A WORKOUT AND DIET PLAN       #####
 
 @app.route('/profesional/<int:role_id>/<int:plan_id>', methods=['POST'])
-@jwt_required
 def profesional_plan(role_id, plan_id):
     if not role_id:
         return jsonify({'msg':'missing role input'})
@@ -891,9 +889,9 @@ def profesional_plan(role_id, plan_id):
 
         if not diet:
             return jsonify({'msg':'missing diet plan'})
-        # all_diets = Planes.query.filter_by(diet_plan=diet.filename).first()
-        # if all_diets:
-        #     return({'msg':'filename already exists, try changing it to a more unique name '})
+        all_diets = Planes.query.filter_by(diet_plan=diet.filename).first()
+        if all_diets:
+            return({'msg':'Por favor, cambia el nombre de la dieta al nombre de tu cliente más el numero del plan creado '})
         if diet and diet.filename!= '' and allowed_files(diet.filename, ALLOWED_EXTENSIONS_FILES):
             filename = secure_filename(diet.filename)
             diet.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'diets'), filename))
@@ -901,7 +899,7 @@ def profesional_plan(role_id, plan_id):
                 if os.path.exists(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'diets'), oldfilename)):
                     os.remove(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'diets'), oldfilename))
         else:
-            return jsonify({"msg":"file is not allowed"}), 400
+            return jsonify({"msg":"Tipo de archivo no permitido"}), 400
         
         diet_plan = Planes.query.get(plan_id)
         diet_plan.diet_plan = filename
@@ -918,7 +916,7 @@ def profesional_plan(role_id, plan_id):
             return jsonify({'msg':'missing workout plan'})
         all_workouts = Planes.query.filter_by(workout_plan=workout.filename).first()
         if all_workouts:
-            return({'msg':'filename already exists, try changing it to a more unique name '})
+            return({'msg':'Por favor, cambia el nombre de tu plan de entrenamiento al nombre de tu cliente más el numero del plan creado'})
         if workout and workout.filename!= '' and allowed_files(workout.filename, ALLOWED_EXTENSIONS_FILES):
             filename = secure_filename(workout.filename)
             workout.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'workouts'), filename))
@@ -1000,7 +998,6 @@ def client_register():
     
 
 @app.route('/avatar/edit/<int:role_id>/<int:id>', methods=['PUT'])
-@jwt_required
 def edit_client(role_id,id):
     if role_id == 2:
         specific_nutritionist= Nutritionist.query.get(id)
@@ -1077,7 +1074,6 @@ def edit_client(role_id,id):
 @app.route('/client/plan/<int:id_client>/<int:plan_id>', methods=['GET'])
 @app.route('/client/plan/<int:id_client>/<int:plan_id>/<schedule>/<filename>', methods=['GET'])
 @app.route('/client/plan/<int:id_client>/<mail_client>/<mail_trainer>/<mail_nutritionist>', methods=['POST'])
-@jwt_required
 def client_plan(id_client = None, plan_id= None, schedule = None, filename = None, mail_client = None ,mail_trainer= None ,mail_nutritionist= None):   
     if request.method == 'GET':
         client = Client.query.get(id_client)
@@ -1197,13 +1193,6 @@ def client_plan(id_client = None, plan_id= None, schedule = None, filename = Non
 
         return jsonify(plan.serialize()),200
 
-# @app.route('/plan/workout/<filename>')
-# def workout(filename):
-#     return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'],'workouts'), filename)       
-# @app.route('/plan/diet/<filename>')
-# def diet(filename):
-#     return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'],'diets'), filename)       
-
 
 ### GET ALL AVATARS     ######
 
@@ -1222,7 +1211,6 @@ def get_avatar(role_id, filename):
 
 @app.route('/contact/profesional/<int:role_id>/<int:id_plan>', methods=['GET'])
 @app.route('/contact/profesional/<int:role_id_send>/<int:role_id_recieve>/<int:id_plan>', methods=['POST'])
-@jwt_required
 def contact_profesional(role_id = None,role_id_send=None, role_id_recieve = None ,id_plan=None):
     
     
@@ -1530,87 +1518,34 @@ def reset_token(role_id,token):
         return jsonify({'msg':'Password actualizado'}), 200
 
 
-
-# @app.route('/contact/profesional/<int:role_id>/<int:id_plan>', methods=['POST', 'GET'])
-# def contact_profesional(role_id = None, id_plan=None):
-#     if not request.is_json:
-#         return jsonify({'msg':'Missing JSON request'})
+@app.route('/contact-us', methods=['POST'])
+def contact():
+    if not request.is_json:
+        return jsonify({'msg':'Missing JSON request'})
     
-#     if request.method == 'GET':
-#         if role_id == 2:
-#             plan_messages = ClientNutritionist.query.filter_by(plan_id=id_plan).all()
-#             all_messages = list(map(lambda contact: contact.serialize(),plan_messages))
-#             messages = all_messages
-#             return jsonify(messages)
-#         if role_id == 3:
-#             plan_messages = ClientTrainer.query.filter_by(plan_id=id_plan).all()
-#             all_messages = list(map(lambda contact: contact.serialize(),plan_messages))
-#             messages = all_messages
-#             return jsonify(messages)
+    name = request.json.get('name')
+    email = request.json.get('email')
+    message = request.json.get('message')
 
+    if not name or name =='':
+        return jsonify({"msg": 'missing name field'}), 400
+    if not email or email =='':
+        return jsonify({"msg": 'missing email field'}), 400
+    if not message or message =='':
+        return jsonify({"msg": 'missing message field'}), 400
 
-#     if request.method == 'POST':
+    data = {
+        'name' : name,
+        'email': email,
+        'message': message
+    }
 
-#         if role_id == 2:
+    msg = Message('Contacto Fit Good', sender = email, recipients=['fit.good.app@gmail.com'])
+    
+    msg.html = render_template('email_template.html', data=data )
+    mail.send(msg)
 
-#             client_id = request.json.get('client_id')
-#             nutritionist_id = request.json.get('nutritionist_id')
-#             plan_id = request.json.get('plan_id')
-#             comment = request.json.get('comment')
-
-#             if not comment or comment == '':
-#                 return jsonify({'msg':'you must enter a comment'})
-#             if not nutritionist_id or nutritionist_id == '':
-#                 return jsonify({'msg':'you must choose the nutritionist id'})
-#             if not plan_id or plan_id == '':
-#                 return jsonify({'msg':'you must choose a plan id'})
-#             if not client_id or client_id == '':
-#                 return jsonify({'msg':'you must entrer client id'})
-#             if not Planes.query.filter_by(id=id_plan).all():
-#                 return jsonify({'msg':'plan not found in data base'})
-#             client_nutritionist = ClientNutritionist()
-#             client_nutritionist.client_id = client_id
-#             client_nutritionist.nutritionist_id = nutritionist_id
-#             client_nutritionist.plan_id = plan_id
-#             client_nutritionist.comment = comment
-
-#             db.session.add(client_nutritionist)
-#             db.session.commit()
-
-#             return jsonify(client_nutritionist.serialize())
-            
-#         if role_id == 3:
-
-#             client_id = request.json.get('client_id')
-#             trainer_id = request.json.get('trainer_id')
-#             plan_id = request.json.get('plan_id')
-#             comment = request.json.get('comment')
-
-#             if not comment or comment == '':
-#                 return jsonify({'msg':'you must enter a comment'})
-#             if not trainer_id or trainer_id == '':
-#                 return jsonify({'msg':'you must choose the trainer id'})
-#             if not plan_id or plan_id == '':
-#                 return jsonify({'msg':'you must choose a plan id'})
-#             if not client_id or client_id == '':
-#                 return jsonify({'msg':'you must entrer client id'})
-#             if not Planes.query.filter_by(id=id_plan).all():
-#                 return jsonify({'msg':'plan not found in data base'})
-#             client_trainer = ClientTrainer()
-#             client_trainer.client_id = client_id
-#             client_trainer.trainer_id = trainer_id
-#             client_trainer.plan_id = plan_id
-#             client_trainer.comment = comment
-
-#             db.session.add(client_trainer)
-#             db.session.commit()
-
-#             return jsonify(client_trainer.serialize())
-
-
-
-
-
+    return jsonify({"success": "mail sent"}), 200
 @manager.command
 def loadroles():
     role = Role()
