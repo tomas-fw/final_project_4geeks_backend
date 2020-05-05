@@ -655,7 +655,7 @@ def profesional_register(role):
     if role == 2:
         nutri = Nutritionist.query.filter_by(email =email).first()
         if nutri:
-            return jsonify({"msg":'email already register'}),400
+            return jsonify({"msg":'El email que intentas registrar ya existe, por favor, ingresa otro'}),400
         
         avatar = request.files['avatar']
         all_avatars = Nutritionist.query.filter_by(avatar=avatar.filename).first()
@@ -666,44 +666,44 @@ def profesional_register(role):
             filename = secure_filename(avatar.filename)
             avatar.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar/nutritionist'), filename)), 400
         else:
-            return jsonify({"msg":"Tipo de archivo, no permitido"}), 400
+            return jsonify({"msg":"Tipo de archivo no permitido, tu foto de perfil tiene que ser en formato imagen"}), 400
             
         background = request.files['background']
         if not background:
             return ({'msg':'Por favor adjunta tus antecedentes'})
         all_backgrounds = Nutritionist.query.filter_by(background=background.filename).first()
         if all_backgrounds:
-            return jsonify({'msg':'Por favor, cambia el nombre de tu foto de perfil a tu correo o rut'}), 400
+            return jsonify({'msg':'Por favor, cambia el nombre del archivo de tus antecedentes penales a tu correo o rut'}), 400
         if background and background.filename!= '' and allowed_files(background.filename, ALLOWED_EXTENSIONS_FILES):
             background_filename = secure_filename(background.filename)
             background.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/background/nutritionist'), background_filename))
         else:
-            return jsonify({"msg":"Tipo de archivo no permitido"}), 400
+            return jsonify({"msg":"El formato del archivo tiene que ser PDF"}), 400
 
         title = request.files['title']
         if not title:
             return ({'msg':'Por favor ingresa tu titulo profesional'}).first()
         all_titles = Nutritionist.query.filter_by(profesional_title=title.filename).first()
         if all_titles:
-            return jsonify({'msg':'Por favor, cambia el nombre de tu foto de perfil a tu correo o rut'}), 400
+            return jsonify({'msg':'Por favor, cambia el nombre del archivo de tu titulo a tu correo o rut'}), 400
         if title and title.filename!= '' and allowed_files(title.filename, ALLOWED_EXTENSIONS_FILES):
             title_filename = secure_filename(title.filename)
             title.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/profesional_title/nutritionist'), title_filename))
         else:
-            return jsonify({"msg":"Tipo de archivo no permitido"}), 400
+            return jsonify({"msg":"El formato del archivo tiene que ser PDF"}), 400
 
         title_validation = request.files['title_validation']
         if not title_validation:
             return jsonify({'msg':'Por favor adjunto tu certificado de la super intendencia'})
         all_title_validation = Nutritionist.query.filter_by(nutritionist_validation_title = title_validation.filename ).first()
         if all_title_validation:
-            return jsonify({'msg':'Por favor, cambia el nombre de tu foto de perfil a tu correo o rut'})
+            return jsonify({'msg':'Por favor, cambia el nombre del archivo de super la intendencia a tu correo o rut'})
 
         if title_validation and title_validation.filename!= '' and allowed_files(title_validation.filename, ALLOWED_EXTENSIONS_FILES):
             title_validation_filename = secure_filename(title_validation.filename)
             title_validation.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/title_validation'), title_validation_filename))
         else:
-            return jsonify({"msg":"Tipo de archivo no permitido"}), 400
+            return jsonify({"msg":"El formato del archivo tiene que ser PDF"}), 400
 
         if not background or background == '':
             return jsonify({'msg':'background missing'})
@@ -744,42 +744,42 @@ def profesional_register(role):
     if role == 3:
         trainer = Trainer.query.filter_by(email = email).first()
         if trainer:
-            return jsonify({"msg":'email already register'}),400
+            return jsonify({"msg":'El email que intentas registrar ya existe, por favor, ingresa otro'}),400
         
         avatar = request.files['avatar']
         all_avatars = Trainer.query.filter_by(avatar=avatar.filename).first()
         if all_avatars:
-            return jsonify({'msg':'please change name of profile card to you RUT number'}), 400
+            return jsonify({'msg':'Por favor, cambia el nombre de tu foto de perfil a tu correo o rut'}), 400
         if avatar and avatar.filename!= '' and allowed_files(avatar.filename, ALLOWED_EXTENSIONS_IMAGES):
             filename = secure_filename(avatar.filename)
             avatar.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar/trainer'), filename))
         else:
-            return jsonify({"msg":"file is not allowed"}), 400
+            return jsonify({"msg":"Tipo de archivo no permitido, tu foto de perfil tiene que ser en formato imagen"}), 400
             
         background = request.files['background']
         if not background:
-            return ({'msg':'please attached your background'})
+            return ({'msg':'Por favor, adjunta tus antecedentes penales'})
         all_backgrounds = Trainer.query.filter_by(background=background.filename).first()
         if all_backgrounds:
-            return jsonify({'msg':' background filename already exists, please change the name of your file to the name of your email'}), 400
+            return jsonify({'msg':' Por favor, cambia el nombre del archivo de tus antecedentes penales a tu correo o rut'}), 400
         
         if background and background.filename!= '' and allowed_files(background.filename, ALLOWED_EXTENSIONS_FILES):
             background_filename = secure_filename(background.filename)
             background.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/background/trainer'), background_filename))
         else:
-            return jsonify({"msg":"file is not allowed"}), 400
+            return jsonify({"msg":"El formato del archivo tiene que ser PDF"}), 400
 
         title = request.files['title']
         if not title:
-            return ({'msg':'please attached your profesional title'})
+            return ({'msg':'Por favor, adjunta tu titulo profesional'})
         all_titles = Trainer.query.filter_by(profesional_title=title.filename).first()
         if all_titles:
-            return jsonify({'msg':'profesional title filename already exists, please change the name of your file to the name of your email'}),400
+            return jsonify({'msg':'Por favor, cambia el nombre del archivo de tu titulo a tu correo o rut'}),400
         if title and title.filename!= '' and allowed_files(title.filename, ALLOWED_EXTENSIONS_FILES):
             title_filename = secure_filename(title.filename)
             title.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/profesional_title/trainer'), title_filename))
         else:
-            return jsonify({"msg":"file is not allowed"}), 400
+            return jsonify({"msg":"El formato del archivo tiene que ser PDF"}), 400
 
         
 
@@ -957,12 +957,12 @@ def client_register():
     
     client = Client.query.filter_by(email = email).first()
     if client:
-        return jsonify({"msg":"Email already register"}), 400
+        return jsonify({"msg":"El email que intenas registrar, ya existe, por favor, ingresa otro"}), 400
     
     file = request.files['avatar']
     all_avatars = Client.query.filter_by(avatar=file.filename).first()
     if all_avatars:
-        return jsonify({'msg':'please change name of profile card to you RUT number'}), 400
+        return jsonify({'msg':'Por favor, cambia el nombre de tu foto de perfil a tu correo o rut'}), 400
     if file and file.filename != '' and allowed_files(file.filename, ALLOWED_EXTENSIONS_IMAGES):
         filename = secure_filename(file.filename)
         file.save(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar/clients'), filename))
@@ -971,7 +971,7 @@ def client_register():
         #         os.remove(os.path.join(os.path.join(app.config['UPLOAD_FOLDER'], 'images/avatar/clients'), oldfilename))
         
     else:
-        return jsonify({"msg":"file is not allowed"}), 400
+        return jsonify({"msg":"Tipo de archivo no permitido, tu foto de perfil tiene que ser en formato imagen"}), 400
         
     
     client = Client()

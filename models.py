@@ -301,7 +301,7 @@ class ClientTrainer(db.Model):
     plan_id = db.Column(db.Integer, db.ForeignKey('planes.id'), nullable=False)
     comment = db.Column(db.String(250), nullable=True)
     date_created = db.Column(db.DateTime, nullable = False, default = datetime.utcnow)
-
+    
 
     def serialize(self):
         return {
