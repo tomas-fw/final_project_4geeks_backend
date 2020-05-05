@@ -61,7 +61,7 @@ def download_document(document):
     
     # return render_template('index.html')
     try:
-        return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'], 'downloads'), filename= document, as_attachment=True)
+        return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'], 'download'), filename= document, as_attachment=True)
 
     except FileNotFoundError:
         abort(404)
